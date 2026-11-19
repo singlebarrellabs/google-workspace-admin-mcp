@@ -1,0 +1,42 @@
+schema: spec-driven
+
+context: |
+  google-workspace-admin-mcp is an MCP server for the Google Workspace admin
+  plane, driven by a stdio connection and a single admin user OAuth credential.
+
+  Permanent non-goals, which every artifact must respect: no impersonation (no
+  `as` parameter, no subject claim), no service accounts, no domain-wide
+  delegation, and no user-content APIs (Gmail, Drive, Docs, Sheets, Slides,
+  Calendar, Chat, Meet, Keep, Tasks, Forms, YouTube, Classroom, Sites, Apps
+  Script). A CI test asserts this surface stays absent.
+
+  Safety requirements: read-only by default (mutating tools are omitted, not
+  failed at call time), explicit confirm flags on destructive operations, an
+  append-only local audit log, and edition-aware errors for Enterprise-only
+  surfaces (Vault, Cloud Search).
+
+  Delivery is flat: one change, one capability per admin surface, no version
+  phases. Tasks are grouped by surface because the surfaces are independent and
+  can be built in parallel. Tests use nock fixtures; no live tenant in CI.
+
+# Per-artifact rules (optional)
+# Add custom rules for specific artifacts.
+# Example:
+#   rules:
+#     proposal:
+#       - Keep proposals under 500 words
+#       - Always state what is out of scope
+#     tasks:
+#       - Break tasks into chunks of max 2 hours
+
+# Per-operation guidance (optional)
+# Add advisory guidance for how apply and archive work should be conducted.
+# This is separate from artifact rules above.
+# Example:
+#   operations:
+#     apply:
+#       guidance:
+#         - Keep test summaries concise
+#     archive:
+#       guidance:
+#         - Summarize the archive outcome before finishing
