@@ -5,7 +5,10 @@ is a bug.
 
 | Tool | Surface | Mutating | Notes |
 | --- | --- | --- | --- |
-| _none yet_ | | | |
+| `gws_auth_status` | system | no | Credential state, token expiry, mode, scopes. |
+| `gws_scopes_list` | system | no | The admin-only scopes this server requests. |
+| `gws_users_list` | directory | no | Pages users; org unit becomes a query clause. |
+| `gws_users_suspend` | directory | yes | Destructive; needs `confirm: true`. |
 
 ## Conventions
 
