@@ -76,8 +76,53 @@ undercuts that premise.
 - Tenant identifiers: customer ID, primary domain, org unit paths.
 
 Credentials live in the operator's environment for the duration of a run. The
-development process consumes redacted output only; it never receives a secret and
-never holds a token.
+development process never receives a secret in a message, a commit or an issue.
+What it can read locally is covered under the limits below.
+
+## Automated smoke runs
+
+Smoke should run unattended: the value is detecting fixture drift before a user
+hits it, which needs a schedule, not discipline.
+
+- `npm run smoke:auto` runs the read-only smoke for every surface, redacts the
+  output, and writes `.smoke/<timestamp>/report.json` plus `summary.md`. Both are
+  mode `0600` and gitignored. Non-zero exit on drift.
+- Scheduling is local (`launchd` or `cron`, daily). No CI workflow ever holds a
+  tenant credential — a public repo's Actions secrets are the wrong place for a
+  refresh token.
+- Drift detection compares each live response against its fixture's **shape**:
+  key presence, types, nullability. Not values, so no tenant data enters the
+  comparison.
+- On drift the report names the surface, the field path, and the expected versus
+  observed type. A redacted sample may be attached; it is never fetched by
+  default.
+
+Guards. Each is a hard refusal, not a warning:
+
+- **Tenant allowlist** — refuses unless the signed-in domain appears in
+  `SMOKE_ALLOWED_DOMAINS`. The value lives in a gitignored file and is never
+  committed.
+- **Write isolation** — mutating smoke requires `SMOKE_WRITE=1` and a domain
+  matching `SMOKE_SANDBOX_DOMAIN`, which must differ from the allowlisted
+  production domain.
+- **Artifact location** — refuses to write outside `.smoke/`, refuses to run if
+  `.smoke/` is not gitignored, and chmods every artifact to owner-only.
+- **Redaction** — cannot be disabled without an interactive terminal and an
+  explicit flag.
+- **CI** — refuses to run at all when `CI` is set.
+- **Secret scan** — scans the rendered report for real-looking email addresses
+  and domains before writing; a hit aborts the run and writes nothing.
+
+Limits, stated plainly:
+
+- A process running as your user can read the token store. Redaction protects what
+  gets **written and shared**, not a compromised host. The bounds that matter are
+  a dedicated smoke tenant, read-only automation, revocation when done, and
+  rotation on any suspicion.
+- Read-only automation against a production tenant is a judgement call, not a
+  default: admin audit logs will show the traffic.
+- Drift reports are shape-only. A field that changes meaning without changing type
+  is invisible to them; smoke complements fixture review, it does not replace it.
 
 ## After a smoke run
 

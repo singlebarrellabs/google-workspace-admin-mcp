@@ -76,7 +76,8 @@ Therefore:
   are never part of CI.
 - Smoke scripts **redact by default** and require an explicit `--raw` plus
   interactive confirmation to emit unredacted output. Never remove that default.
-  See `docs/SMOKE-TESTING.md` for the access rules.
+  Automated smoke is read-only, guarded and never runs in CI. See
+  `docs/SMOKE-TESTING.md` for the access rules.
 
 ```bash
 npm run check   # typecheck + lint + test

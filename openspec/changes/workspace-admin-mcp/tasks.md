@@ -126,6 +126,12 @@ can proceed in parallel worktrees. Issue numbers are in parentheses.
 - [ ] 13.5 README install section once published
 - [ ] 13.6 Smoke redaction: deterministic placeholders, refusal to write raw
       output without explicit confirmation, `--raw` unavailable in CI
+- [ ] 13.7 Automated smoke: `smoke:auto` read-only runner, shape-based drift
+      comparison, redacted report in `.smoke/` at mode 0600
+- [ ] 13.8 Smoke guards: tenant allowlist, sandbox-only writes, CI refusal,
+      artifact location check, post-render secret scan
+- [ ] 13.9 Local schedule template (`launchd`/`cron`) documented; no CI job holds
+      a tenant credential
 
 ## 14. Release
 
