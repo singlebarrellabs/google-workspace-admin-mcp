@@ -74,6 +74,9 @@ Therefore:
   pagination when applicable.
 - Opt-in smoke scripts (`npm run smoke:<surface>`) run against a real tenant and
   are never part of CI.
+- Smoke scripts **redact by default** and require an explicit `--raw` plus
+  interactive confirmation to emit unredacted output. Never remove that default.
+  See `docs/SMOKE-TESTING.md` for the access rules.
 
 ```bash
 npm run check   # typecheck + lint + test
@@ -93,6 +96,9 @@ Use the local binaries for lint, the npm wrappers can fail in some shells:
   tests, docs, issues or PR bodies.
 - A pre-commit hook rejects added lines containing real-looking email addresses.
 - Never print credentials, tokens or client secrets in logs, tests or output.
+- Tenant access is optional and governed by `docs/SMOKE-TESTING.md`: no live
+  tenant is required to contribute, and shared smoke output is redacted by
+  default.
 
 ## Documentation
 

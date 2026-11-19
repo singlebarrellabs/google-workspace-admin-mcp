@@ -51,3 +51,27 @@ script SHALL run as part of CI.
 
 - WHEN CI executes the standard check task
 - THEN no network call to Google is made
+
+### Requirement: Smoke output is redacted by default
+
+Smoke scripts SHALL replace emails, domains, customer IDs, group names and resource
+identifiers with stable placeholders before writing output, and SHALL require an
+explicit opt-in with interactive confirmation to emit unredacted output.
+
+#### Scenario: Default smoke run
+
+- WHEN a smoke script runs without flags
+- THEN its output contains only placeholders and remains internally consistent
+  across the run
+
+#### Scenario: Unredacted output requested
+
+- WHEN a caller passes the raw flag
+- THEN the script names the destination and requires interactive confirmation
+  before writing
+- AND the raw flag is unavailable in CI
+
+#### Scenario: Contribute without a tenant
+
+- WHEN a contributor has no Google Workspace tenant
+- THEN fixture-based tests cover the surface and no contribution is blocked

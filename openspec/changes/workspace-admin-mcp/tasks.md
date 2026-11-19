@@ -124,6 +124,8 @@ can proceed in parallel worktrees. Issue numbers are in parentheses.
 - [ ] 13.3 Scope list generated from code and asserted against the client config
 - [ ] 13.4 Per-surface smoke scripts, documented as opt-in
 - [ ] 13.5 README install section once published
+- [ ] 13.6 Smoke redaction: deterministic placeholders, refusal to write raw
+      output without explicit confirmation, `--raw` unavailable in CI
 
 ## 14. Release
 

@@ -105,6 +105,10 @@ Specs live in `openspec/changes/workspace-admin-mcp/`. Each capability spec is
 linked from its tracking issue. OpenSpec is used for planning only; tests are the
 enforcement mechanism.
 
+No live Workspace tenant is needed to contribute. Verification tiers, tenant
+access levels, and the redaction rules for smoke output are in
+[`docs/SMOKE-TESTING.md`](docs/SMOKE-TESTING.md).
+
 ## License
 
 MIT. Part of the Single Barrel Labs MCP family — `google-services-mcp` covers the
