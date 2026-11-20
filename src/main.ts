@@ -6,6 +6,7 @@ import { authorize, createOAuthClient } from "./auth/oauth.js";
 import { FileTokenStore } from "./auth/token-store.js";
 import { buildServer } from "./server.js";
 import { DirectoryService } from "./services/directory.js";
+import { LicensingService } from "./services/licensing.js";
 
 const VERSION = "0.1.0";
 
@@ -34,6 +35,7 @@ async function main(): Promise<void> {
     config,
     token,
     directory: auth ? new DirectoryService(auth) : undefined,
+    licensing: auth ? new LicensingService(auth) : undefined,
   });
 
   await server.connect(new StdioServerTransport());

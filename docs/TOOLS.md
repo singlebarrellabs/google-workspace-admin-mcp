@@ -9,6 +9,10 @@ is a bug.
 | `gws_scopes_list` | system | no | The admin-only scopes this server requests. |
 | `gws_users_list` | directory | no | Pages users; org unit becomes a query clause. |
 | `gws_users_suspend` | directory | yes | Destructive; needs `confirm: true`. |
+| `gws_licenses_list` | licensing | no | Assignments by product, optionally by SKU. |
+| `gws_licenses_get` | licensing | no | One assignment. |
+| `gws_licenses_assign` | licensing | yes | Destructive; consumes a paid seat. |
+| `gws_licenses_revoke` | licensing | yes | Destructive; product access ends now. |
 
 ## Conventions
 
