@@ -9,6 +9,7 @@
   },
   "files": [
     "dist/",
+    "docs/",
     "README.md",
     "LICENSE"
   ],
@@ -19,9 +20,16 @@
     "typecheck": "tsc --noEmit",
     "lint": "biome check . && markdownlint-cli2 \"**/*.md\" \"#node_modules/**\" \"#dist/**\" \"#.git/**\"",
     "lint:fix": "biome check --write . && markdownlint-cli2 --fix \"**/*.md\" \"#node_modules/**\" \"#dist/**\" \"#.git/**\"",
-    "check": "npm run typecheck && npm run lint && npm test",
+    "check": "npm run typecheck && npm run lint && npm run docs:scopes:check && npm test",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "docs:scopes": "tsx scripts/generate-scopes.ts",
+    "docs:scopes:check": "tsx scripts/generate-scopes.ts --check",
+    "docs:tools": "tsx scripts/generate-tools.ts",
+    "smoke:status": "tsx scripts/smoke.ts --status",
+    "smoke:read": "tsx scripts/smoke.ts --auto",
+    "smoke:auto": "tsx scripts/smoke.ts --auto",
+    "smoke:record": "tsx scripts/smoke.ts --auto --record"
   },
   "keywords": [
     "mcp",

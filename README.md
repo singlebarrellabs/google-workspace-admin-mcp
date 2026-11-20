@@ -3,8 +3,9 @@
 An MCP server for the **Google Workspace admin plane**: the APIs that manage a
 tenant, not the ones that read a user's mail.
 
-> **Status: early development.** The repository is scaffolded and specified; no
-> tools are implemented yet. Track progress in the
+> **Status: early development.** Surfaces land one branch at a time; the tool
+> list for the checked-out revision is in [`docs/TOOLS.md`](docs/TOOLS.md) and
+> setup is in [`docs/SETUP.md`](docs/SETUP.md). Track progress in the
 > [issues](https://github.com/singlebarrellabs/google-workspace-admin-mcp/issues).
 
 ## Why
@@ -85,29 +86,39 @@ signs in once; the refresh token is stored locally with owner-only permissions.
 
 ## Install
 
-Not published yet. The intended flow:
-
 ```bash
-npx google-workspace-admin-mcp
+npm install -g google-workspace-admin-mcp
+export GWS_CLIENT_ID=...        # Desktop-app OAuth client, Internal consent screen
+export GWS_CLIENT_SECRET=...
+google-workspace-admin-mcp auth
 ```
 
-with credentials configured through environment variables documented in
-`docs/SETUP.md` once that file exists.
+`npx google-workspace-admin-mcp` works the same way once the package is
+published. The full walkthrough — enabling the six APIs, the consent screen, the
+admin roles per surface, the seven-day refresh-token trap — is in
+[`docs/SETUP.md`](docs/SETUP.md).
+
+The server starts read-only. Set `GWS_MODE=write` to register mutating tools, and
+`GWS_PASSTHROUGH=on` for the allowlisted raw-call tools.
 
 ## Development
 
 ```bash
 npm install
-npm run check   # typecheck + lint + tests
+npm run check   # typecheck + lint + generated docs + tests
 ```
+
+`npm run docs:scopes` regenerates the scope list in `docs/SETUP.md` from
+`ADMIN_SCOPES`; `npm run check` fails when the two disagree.
 
 Specs live in `openspec/changes/workspace-admin-mcp/`. Each capability spec is
 linked from its tracking issue. OpenSpec is used for planning only; tests are the
 enforcement mechanism.
 
 No live Workspace tenant is needed to contribute. Verification tiers, tenant
-access levels, and the redaction rules for smoke output are in
-[`docs/SMOKE-TESTING.md`](docs/SMOKE-TESTING.md).
+access levels, the redaction rules for smoke output and the smoke commands are in
+[`docs/SMOKE-TESTING.md`](docs/SMOKE-TESTING.md). Smoke never runs in CI, and the
+runner refuses when it detects one.
 
 ## License
 

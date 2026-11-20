@@ -1,7 +1,8 @@
 # Tools
 
-One row per tool. The table is filled in as surfaces land — a tool without a row
-is a bug.
+One row per tool.  A tool without a row is a bug: `npm test` builds every tool
+module and fails when a registered tool is not listed here. `npm run docs:tools`
+appends a placeholder row for anything new; the notes still need a human.
 
 | Tool | Surface | Mutating | Notes |
 | --- | --- | --- | --- |
