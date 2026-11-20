@@ -5,7 +5,9 @@ import type { StoredToken } from "./auth/token-store.js";
 import type { AnyToolSpec } from "./catalog.js";
 import { AuditLog } from "./safety/audit.js";
 import { requireConfirm, toolsForMode } from "./safety/policy.js";
+import type { CloudSearchService } from "./services/cloud-search.js";
 import type { DirectoryService } from "./services/directory.js";
+import { cloudSearchTools } from "./tools/cloud-search.js";
 import { directoryTools } from "./tools/directory.js";
 import { systemTools } from "./tools/system.js";
 import { mapGoogleError, ToolError } from "./util/errors.js";
@@ -14,6 +16,7 @@ export interface ServerDeps {
   config: AppConfig;
   token?: StoredToken;
   directory?: DirectoryService;
+  cloudSearch?: CloudSearchService;
 }
 
 export function buildServer(deps: ServerDeps): { server: McpServer; tools: string[] } {
@@ -22,6 +25,7 @@ export function buildServer(deps: ServerDeps): { server: McpServer; tools: strin
   const specs: AnyToolSpec[] = [
     ...systemTools({ config, token }),
     ...(deps.directory ? directoryTools(deps.directory) : []),
+    ...(deps.cloudSearch ? cloudSearchTools(deps.cloudSearch) : []),
   ];
 
   const registered = toolsForMode(specs, config.mode);

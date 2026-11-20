@@ -9,6 +9,9 @@ is a bug.
 | `gws_scopes_list` | system | no | The admin-only scopes this server requests. |
 | `gws_users_list` | directory | no | Pages users; org unit becomes a query clause. |
 | `gws_users_suspend` | directory | yes | Destructive; needs `confirm: true`. |
+| `gws_cloud_search_query` | cloud-search | no | Enterprise only; empty results say why. |
+| `gws_cloud_search_suggest` | cloud-search | no | Query completion. Enterprise only. |
+| `gws_cloud_search_sources_list` | cloud-search | no | Data sources Cloud Search can query. |
 
 ## Conventions
 
