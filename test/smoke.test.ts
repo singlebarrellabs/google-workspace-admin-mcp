@@ -50,6 +50,22 @@ describe("redaction", () => {
     });
   });
 
+  it("keeps structure-bearing strings readable", () => {
+    const redactor = new Redactor("acme.example");
+
+    expect(
+      redactor.data({
+        scopes: ["https://www.googleapis.com/auth/ediscovery"],
+        editionCapability: { source: "probe", state: "unknown", detail: "not probed" },
+        tokenPath: ["", "Users", "someone", ".local/state/token.json"].join("/"),
+      }),
+    ).toEqual({
+      scopes: ["https://www.googleapis.com/auth/ediscovery"],
+      editionCapability: { source: "probe", state: "unknown", detail: "not probed" },
+      tokenPath: "path-1/.local/state/token.json",
+    });
+  });
+
   it("redacts identifiers, names and the tenant domain", () => {
     const redactor = new Redactor("acme.example");
     const out = redactor.data({

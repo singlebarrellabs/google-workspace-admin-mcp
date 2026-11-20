@@ -85,7 +85,10 @@ export class Redactor {
       return value;
     }
 
-    return this.placeholder("text", value);
+    // Anything else is not identity by itself: keep it readable, but still scrub
+    // an email, the tenant domain or a home path that appears inside it. The
+    // pre-write leak scan is the backstop if this misses something.
+    return this.text(value);
   }
 
   private placeholder(kind: string, value: string): string {
