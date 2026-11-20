@@ -6,6 +6,7 @@ import { authorize, createOAuthClient } from "./auth/oauth.js";
 import { FileTokenStore } from "./auth/token-store.js";
 import { buildServer } from "./server.js";
 import { DirectoryService } from "./services/directory.js";
+import { TransferService } from "./services/transfer.js";
 
 const VERSION = "0.1.0";
 
@@ -34,6 +35,7 @@ async function main(): Promise<void> {
     config,
     token,
     directory: auth ? new DirectoryService(auth) : undefined,
+    transfer: auth ? new TransferService(auth) : undefined,
   });
 
   await server.connect(new StdioServerTransport());
