@@ -30,7 +30,6 @@ name, open it, press **Enable**.
 | API | Service name | Needed for |
 | --- | --- | --- |
 | Admin SDK API | `admin.googleapis.com` | Directory, Reports, Data Transfer |
-| Alert Center API | `alertcenter.googleapis.com` | Alert Center |
 | Cloud Search API | `cloudsearch.googleapis.com` | Cloud Search (Enterprise) |
 | Google Vault API | `vault.googleapis.com` | Vault (Enterprise) |
 | Groups Settings API | `groupssettings.googleapis.com` | Group settings |
@@ -139,7 +138,6 @@ A super admin has all of them; anything less should be a custom role.
 | --- | --- |
 | Directory | User Management, Groups, or a custom admin role |
 | Reports | Reports privilege |
-| Alert Center | Alert Center privilege |
 | Vault | Vault privileges: View All Matters, Manage Holds, Manage Searches, Manage Exports |
 | Cloud Search | Cloud Search administrator |
 | Data Transfer | Data Transfer privilege |
@@ -171,7 +169,6 @@ Start read-only, use it for a while, and only then enable writes.
 | --- | --- |
 | Vault | Enterprise, Enterprise Plus, Education |
 | Cloud Search | Enterprise, Enterprise Plus, Education |
-| Alert Center | Business and above (not every Frontline tier) |
 | Data Transfer | Workspace paid editions |
 | Directory, Reports, Licenses, Groups Settings, Resources | every edition |
 
@@ -222,4 +219,4 @@ fails when the two disagree.
 
 Nothing in the server impersonates a user. If a task seems to need that, the
 audited path is Vault (holds and exports), Data Transfer (offboarding), or
-Reports and Alert Center (investigation).
+Reports (investigation).

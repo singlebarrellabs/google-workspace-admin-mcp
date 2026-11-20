@@ -1,7 +1,7 @@
 {
   "name": "google-workspace-admin-mcp",
   "version": "0.1.0",
-  "description": "MCP server for the Google Workspace admin plane: Directory, Reports, Alert Center, Vault, Cloud Search, Data Transfer, Licensing. Admin OAuth only - no impersonation, no service accounts.",
+  "description": "MCP server for the Google Workspace admin plane: Directory, Reports, Vault, Cloud Search, Data Transfer, Licensing. Admin OAuth only - no impersonation, no service accounts.",
   "type": "module",
   "main": "dist/main.js",
   "bin": {
@@ -39,7 +39,6 @@
     "admin sdk",
     "directory api",
     "reports api",
-    "alert center",
     "vault",
     "ediscovery",
     "cloud search",

@@ -16,7 +16,7 @@ Constraints that shaped the design:
   from reality, so tests need recorded request/response fixtures plus opt-in smoke
   scripts.
 - **Edition variance.** Vault and Cloud Search are Enterprise/Education. Data
-  Transfer and Alert Center are broadly available but not universal. A tool that
+  Transfer are broadly available but not universal. A tool that
   returns a raw 403 teaches a model to invent workarounds.
 
 ## Goals

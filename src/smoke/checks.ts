@@ -41,12 +41,6 @@ export const SMOKE_CHECKS: SmokeCheck[] = [
     args: { applicationName: "login", maxResults: 1 },
   },
   {
-    id: "alerts-list",
-    surface: "alerts",
-    tool: "gws_alerts_list",
-    args: { pageSize: 1 },
-  },
-  {
     id: "vault-matters",
     surface: "vault",
     tool: "gws_vault_matters_list",

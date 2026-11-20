@@ -37,7 +37,7 @@ stated in a README:
 
 The supported paths for the things people use impersonation for are the audited
 ones: **Vault** for legal holds and eDiscovery, **Data Transfer** for offboarding,
-**Reports** and **Alert Center** for investigation. That is the whole design.
+**Reports** for investigation. That is the whole design.
 
 It is also not a GAM replacement. GAM is a scripting language with a decade of
 edge cases; this is a small set of typed tools built to be driven by a model
@@ -49,7 +49,6 @@ without guessing.
 | --- | --- |
 | Directory | users, aliases, groups, members, org units, roles, devices, tokens, domains |
 | Reports | audit activities, customer and entity usage reports |
-| Alert Center | alerts, feedback, delete/undelete |
 | Vault | matters, holds, held accounts, exports, saved queries, operations |
 | Cloud Search | query, suggest, sources |
 | Data Transfer | transfers for offboarding |
@@ -81,8 +80,8 @@ signs in once; the refresh token is stored locally with owner-only permissions.
 - **Append-only local audit log** of every tool call: timestamp, tool, arguments
   (secrets redacted), outcome.
 - **Edition-aware errors.** Vault and Cloud Search require Enterprise or
-  Education; Data Transfer and Alert Center are broadly but not universally
-  available. Those tools say so instead of surfacing a bare 403.
+  Education; Data Transfer is broadly but not universally available. Those
+  tools say so instead of surfacing a bare 403.
 
 ## Install
 

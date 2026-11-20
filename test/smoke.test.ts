@@ -240,7 +240,6 @@ describe("checks", () => {
         "system",
         "directory",
         "reports",
-        "alerts",
         "vault",
         "cloud-search",
         "transfer",
