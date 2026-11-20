@@ -3,7 +3,6 @@ import type { ZodRawShape } from "zod";
 export type Surface =
   | "directory"
   | "reports"
-  | "alerts"
   | "vault"
   | "cloud-search"
   | "transfer"

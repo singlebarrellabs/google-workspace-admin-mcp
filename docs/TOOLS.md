@@ -11,7 +11,6 @@ is a bug.
 | `gws_users_suspend` | directory | yes | Destructive; needs `confirm: true`. |
 | `gws_passthrough_directory` | directory | yes | Off by default; writes need write mode. |
 | `gws_passthrough_reports` | reports | no | Off unless `GWS_PASSTHROUGH=on`. |
-| `gws_passthrough_alerts` | alerts | no | Off unless `GWS_PASSTHROUGH=on`. |
 | `gws_passthrough_vault` | vault | no | Off unless `GWS_PASSTHROUGH=on`. |
 | `gws_passthrough_transfer` | transfer | no | Off unless `GWS_PASSTHROUGH=on`. |
 

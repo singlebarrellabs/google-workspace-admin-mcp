@@ -15,7 +15,6 @@ import {
 const SURFACE: Record<string, Surface> = {
   directory: "directory",
   reports: "reports",
-  alerts: "alerts",
   vault: "vault",
   transfer: "transfer",
 };
@@ -129,7 +128,6 @@ function buildClients(auth: OAuth2Client): Record<string, Client> {
   return {
     directory: google.admin({ version: "directory_v1", auth }) as unknown as Client,
     reports: google.admin({ version: "reports_v1", auth }) as unknown as Client,
-    alerts: google.alertcenter({ version: "v1beta1", auth }) as unknown as Client,
     vault: google.vault({ version: "v1", auth }) as unknown as Client,
     transfer: google.admin({ version: "datatransfer_v1", auth }) as unknown as Client,
   };
