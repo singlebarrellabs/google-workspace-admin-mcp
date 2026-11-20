@@ -17,7 +17,9 @@ export const ADMIN_SCOPES = [
   "https://www.googleapis.com/auth/admin.reports.audit.readonly",
   "https://www.googleapis.com/auth/admin.reports.usage.readonly",
   "https://www.googleapis.com/auth/admin.datatransfer",
-  "https://www.googleapis.com/auth/apps.alerts",
+  // Alert Center (apps.alerts) is absent on purpose: Google requires a service
+  // account with domain-wide delegation for it, which this server refuses.
+  // Requesting it here fails the whole consent with invalid_scope.
   "https://www.googleapis.com/auth/apps.licensing",
   "https://www.googleapis.com/auth/ediscovery",
   "https://www.googleapis.com/auth/cloud_search.query",
