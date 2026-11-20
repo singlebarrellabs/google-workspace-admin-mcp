@@ -9,6 +9,11 @@ is a bug.
 | `gws_scopes_list` | system | no | The admin-only scopes this server requests. |
 | `gws_users_list` | directory | no | Pages users; org unit becomes a query clause. |
 | `gws_users_suspend` | directory | yes | Destructive; needs `confirm: true`. |
+| `gws_alerts_list` | alerts | no | Google's own signals; filter, order and page token. |
+| `gws_alerts_get` | alerts | no | One alert with type data, severity and SIT link. |
+| `gws_alerts_feedback_create` | alerts | yes | Records alert usefulness. |
+| `gws_alerts_delete` | alerts | yes | Destructive; hidden now, purged after 30 days. |
+| `gws_alerts_undelete` | alerts | yes | Destructive; restores within the 30-day window. |
 
 ## Conventions
 

@@ -5,6 +5,7 @@ import { loadConfig } from "./auth/config.js";
 import { authorize, createOAuthClient } from "./auth/oauth.js";
 import { FileTokenStore } from "./auth/token-store.js";
 import { buildServer } from "./server.js";
+import { AlertsService } from "./services/alerts.js";
 import { DirectoryService } from "./services/directory.js";
 
 const VERSION = "0.1.0";
@@ -34,6 +35,7 @@ async function main(): Promise<void> {
     config,
     token,
     directory: auth ? new DirectoryService(auth) : undefined,
+    alerts: auth ? new AlertsService(auth) : undefined,
   });
 
   await server.connect(new StdioServerTransport());
