@@ -6,7 +6,9 @@ import { authorize, createOAuthClient } from "./auth/oauth.js";
 import { FileTokenStore } from "./auth/token-store.js";
 import { buildServer } from "./server.js";
 import { DirectoryService } from "./services/directory.js";
+import { GroupsService } from "./services/directory-groups.js";
 import { DomainsService } from "./services/domains.js";
+import { OrgUnitsService } from "./services/orgunits.js";
 
 const VERSION = "0.1.0";
 
@@ -34,8 +36,14 @@ async function main(): Promise<void> {
   const { server } = buildServer({
     config,
     token,
-    directory: auth ? new DirectoryService(auth) : undefined,
-    domains: auth ? new DomainsService(auth) : undefined,
+    directory: auth
+      ? {
+          users: new DirectoryService(auth),
+          domains: new DomainsService(auth),
+          groups: new GroupsService(auth),
+          orgUnits: new OrgUnitsService(auth),
+        }
+      : undefined,
   });
 
   await server.connect(new StdioServerTransport());
