@@ -203,7 +203,7 @@ status, not message bodies.
 - `https://www.googleapis.com/auth/apps.licensing`
 - `https://www.googleapis.com/auth/ediscovery`
 - `https://www.googleapis.com/auth/cloud_search.query`
-- `https://www.googleapis.com/auth/groupssettings`
+- `https://www.googleapis.com/auth/apps.groups.settings`
 
 <!-- scopes:end -->
 
