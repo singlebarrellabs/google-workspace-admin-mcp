@@ -1,6 +1,6 @@
 import type { OAuth2Client } from "google-auth-library";
 import { type cloudsearch_v1, google } from "googleapis";
-import { mapGoogleError } from "../util/errors.js";
+import { mapGoogleError, ToolError } from "../util/errors.js";
 
 export interface SearchHit {
   title?: string;
@@ -33,6 +33,19 @@ export interface QueryArgs {
   pageSize?: number;
   start?: number;
   sortBy?: string;
+  searchApplicationId?: string;
+}
+
+const DEFAULT_SEARCH_APPLICATION = "searchapplications/default";
+
+/**
+ * Cloud Search wants a fully qualified search application id. A bare id is a
+ * common input, and the API's own error for that is about the prefix rather
+ * than the application, so it is normalised here.
+ */
+function searchApplicationId(value: string | undefined): string {
+  const bare = value?.trim() || "default";
+  return bare.startsWith("searchapplications/") ? bare : `searchapplications/${bare}`;
 }
 
 /**
@@ -53,6 +66,7 @@ export class CloudSearchService {
           query: args.query,
           pageSize: args.pageSize ?? 20,
           start: args.start ?? 0,
+          requestOptions: { searchApplicationId: searchApplicationId(args.searchApplicationId) },
           ...(args.sortBy ? { sortOptions: { operatorName: args.sortBy } } : {}),
         },
       });
@@ -70,7 +84,7 @@ export class CloudSearchService {
 
       // No results can mean "nothing matched" or "this tenant has no data
       // sources at all". Those need different fixes, so ask before reporting.
-      const sources = await this.listSources().catch(() => []);
+      const sources = await this.listSources(args.searchApplicationId).catch(() => []);
       return {
         items,
         ...(sources.length === 0
@@ -78,34 +92,61 @@ export class CloudSearchService {
           : { dataSources: sources.map(sourceLabel) }),
       };
     } catch (error) {
-      throw mapGoogleError(error, "cloud-search");
+      throw mapCloudSearchError(error);
     }
   }
 
-  async suggest(query: string): Promise<SuggestResult> {
+  async suggest(query: string, applicationId?: string): Promise<SuggestResult> {
     try {
-      const response = await this.client.query.suggest({ requestBody: { query } });
+      const response = await this.client.query.suggest({
+        requestBody: {
+          query,
+          requestOptions: { searchApplicationId: searchApplicationId(applicationId) },
+        },
+      });
       const suggestions = (response.data.suggestResults ?? [])
         .map((result) => result.suggestedQuery ?? "")
         .filter((suggestion) => suggestion.length > 0);
       return { suggestions };
     } catch (error) {
-      throw mapGoogleError(error, "cloud-search");
+      throw mapCloudSearchError(error);
     }
   }
 
-  async listSources(): Promise<SourceRow[]> {
+  async listSources(applicationId?: string): Promise<SourceRow[]> {
     try {
-      const response = await this.client.query.sources.list({});
+      const response = await this.client.query.sources.list({
+        "requestOptions.searchApplicationId": searchApplicationId(applicationId),
+      });
       return (response.data.sources ?? []).map((source) => ({
         ...(source.source?.name ? { source: source.source.name } : {}),
         ...(source.displayName ? { displayName: source.displayName } : {}),
         ...(source.shortName ? { shortName: source.shortName } : {}),
       }));
     } catch (error) {
-      throw mapGoogleError(error, "cloud-search");
+      throw mapCloudSearchError(error);
     }
   }
+}
+
+/**
+ * A tenant without Cloud Search enabled answers 403 "Cloud Search must be
+ * enabled", which is a tenant setting rather than a missing admin role.
+ */
+function mapCloudSearchError(error: unknown): ToolError {
+  const response = (error as { response?: { status?: number }; code?: number }).response;
+  const status = response?.status ?? (error as { code?: number }).code;
+  const message = (error as { message?: string }).message ?? "";
+
+  if (status === 403 && /(must|not) be enabled/i.test(message)) {
+    return new ToolError(
+      "edition_unavailable",
+      "Cloud Search is not enabled for this tenant.",
+      "Enable Cloud Search in the Admin console under Apps → Additional Google services, then retry.",
+    );
+  }
+
+  return mapGoogleError(error, "cloud-search");
 }
 
 function toHit(result: cloudsearch_v1.Schema$SearchResult): SearchHit {

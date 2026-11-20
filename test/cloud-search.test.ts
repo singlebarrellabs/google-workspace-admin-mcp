@@ -113,7 +113,13 @@ describe("cloud search query", () => {
 describe("cloud search suggest and sources", () => {
   it("returns the suggested queries", async () => {
     nock("https://cloudsearch.googleapis.com")
-      .post("/v1/query/suggest", { query: "onbo" })
+      .post("/v1/query/suggest", (body) => {
+        expect(body).toMatchObject({
+          query: "onbo",
+          requestOptions: { searchApplicationId: "searchapplications/default" },
+        });
+        return true;
+      })
       .query(true)
       .reply(200, {
         suggestResults: [
@@ -125,6 +131,39 @@ describe("cloud search suggest and sources", () => {
     const result = await service().suggest("onbo");
 
     expect(result.suggestions).toEqual(["onboarding", "onboarding checklist"]);
+  });
+
+  it("normalises a bare search application id and defaults it", async () => {
+    const bare = nock("https://cloudsearch.googleapis.com")
+      .get("/v1/query/sources")
+      .query((query) => {
+        expect(query["requestOptions.searchApplicationId"]).toBe("searchapplications/team");
+        return true;
+      })
+      .reply(200, { sources: [] });
+
+    await service().listSources("team");
+
+    expect(bare.isDone()).toBe(true);
+  });
+
+  it("reports a tenant with Cloud Search disabled as edition_unavailable", async () => {
+    nock("https://cloudsearch.googleapis.com")
+      .get("/v1/query/sources")
+      .query(true)
+      .reply(403, {
+        error: {
+          code: 403,
+          message: "Cloud Search must be enabled to use this API.",
+        },
+      });
+
+    const error = await service()
+      .listSources()
+      .catch((caught: unknown) => caught as { category: string; nextStep?: string });
+
+    expect(error.category).toBe("edition_unavailable");
+    expect(error.nextStep).toContain("Admin console");
   });
 
   it("lists sources with their display names", async () => {
