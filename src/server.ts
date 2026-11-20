@@ -14,6 +14,8 @@ export interface ServerDeps {
   config: AppConfig;
   token?: StoredToken;
   directory?: DirectoryService;
+  /** Built by main when GWS_PASSTHROUGH is on; absent means no passthrough tool. */
+  passthrough?: AnyToolSpec[];
 }
 
 export function buildServer(deps: ServerDeps): { server: McpServer; tools: string[] } {
@@ -22,6 +24,7 @@ export function buildServer(deps: ServerDeps): { server: McpServer; tools: strin
   const specs: AnyToolSpec[] = [
     ...systemTools({ config, token }),
     ...(deps.directory ? directoryTools(deps.directory) : []),
+    ...(deps.passthrough ?? []),
   ];
 
   const registered = toolsForMode(specs, config.mode);
@@ -40,7 +43,7 @@ export function buildServer(deps: ServerDeps): { server: McpServer; tools: strin
           const result = await spec.run(parsed, { dryRun: false });
           await audit.append({
             tool: spec.name,
-            access: spec.access,
+            access: result.access ?? spec.access,
             outcome: "ok",
             durationMs: Date.now() - started,
             args: parsed,

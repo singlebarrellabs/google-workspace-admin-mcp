@@ -4,6 +4,7 @@ import type { OAuth2Client } from "google-auth-library";
 import { loadConfig } from "./auth/config.js";
 import { authorize, createOAuthClient } from "./auth/oauth.js";
 import { FileTokenStore } from "./auth/token-store.js";
+import { passthroughTools } from "./passthrough/dispatch.js";
 import { buildServer } from "./server.js";
 import { DirectoryService } from "./services/directory.js";
 
@@ -34,6 +35,8 @@ async function main(): Promise<void> {
     config,
     token,
     directory: auth ? new DirectoryService(auth) : undefined,
+    passthrough:
+      auth && config.passthrough ? passthroughTools({ auth, mode: config.mode }) : undefined,
   });
 
   await server.connect(new StdioServerTransport());
