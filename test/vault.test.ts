@@ -29,8 +29,6 @@ function service(): VaultService {
   });
 }
 
-const base = "https://vault.googleapis.com/v1";
-
 function tool<T extends { run: (input: unknown, ctx: { dryRun: boolean }) => Promise<unknown> }>(
   name: string,
 ): T {
