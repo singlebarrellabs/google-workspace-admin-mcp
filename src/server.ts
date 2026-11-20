@@ -6,14 +6,17 @@ import type { AnyToolSpec } from "./catalog.js";
 import { AuditLog } from "./safety/audit.js";
 import { requireConfirm, toolsForMode } from "./safety/policy.js";
 import type { DirectoryService } from "./services/directory.js";
+import type { VaultService } from "./services/vault.js";
 import { directoryTools } from "./tools/directory.js";
 import { systemTools } from "./tools/system.js";
+import { vaultTools } from "./tools/vault.js";
 import { mapGoogleError, ToolError } from "./util/errors.js";
 
 export interface ServerDeps {
   config: AppConfig;
   token?: StoredToken;
   directory?: DirectoryService;
+  vault?: VaultService;
 }
 
 export function buildServer(deps: ServerDeps): { server: McpServer; tools: string[] } {
@@ -22,6 +25,7 @@ export function buildServer(deps: ServerDeps): { server: McpServer; tools: strin
   const specs: AnyToolSpec[] = [
     ...systemTools({ config, token }),
     ...(deps.directory ? directoryTools(deps.directory) : []),
+    ...(deps.vault ? vaultTools(deps.vault) : []),
   ];
 
   const registered = toolsForMode(specs, config.mode);
