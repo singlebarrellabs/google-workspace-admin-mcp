@@ -18,7 +18,7 @@
     "start": "node dist/main.js",
     "dev": "tsx src/main.ts",
     "typecheck": "tsc --noEmit",
-    "lint": "biome check . && markdownlint-cli2 \"**/*.md\" \"#node_modules/**\" \"#dist/**\" \"#.git/**\"",
+    "lint": "biome check . && markdownlint-cli2 \"**/*.md\" \"#node_modules/**\" \"#dist/**\" \"#.git/**\" \"#.smoke/**\"",
     "lint:fix": "biome check --write . && markdownlint-cli2 --fix \"**/*.md\" \"#node_modules/**\" \"#dist/**\" \"#.git/**\"",
     "check": "npm run typecheck && npm run lint && npm run docs:scopes:check && npm test",
     "test": "vitest run",
