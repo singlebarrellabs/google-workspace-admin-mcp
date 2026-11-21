@@ -2,7 +2,13 @@ import { OAuth2Client } from "google-auth-library";
 import { describe, expect, it } from "vitest";
 import { loadConfig } from "../src/auth/config.js";
 import { buildServer } from "../src/server.js";
+import { DevicesService } from "../src/services/devices.js";
 import { DirectoryService } from "../src/services/directory.js";
+import { GroupsService } from "../src/services/directory-groups.js";
+import { DomainsService } from "../src/services/domains.js";
+import { OrgUnitsService } from "../src/services/orgunits.js";
+import { RolesService } from "../src/services/roles.js";
+import { UserSecurityService } from "../src/services/user-security.js";
 
 function deps(mode: "readonly" | "write") {
   const config = {
@@ -10,13 +16,22 @@ function deps(mode: "readonly" | "write") {
     tokenPath: "/tmp/test-token.json",
     auditPath: "/tmp/test-audit.jsonl",
   };
-  const directory = new DirectoryService(
-    new OAuth2Client({
-      clientId: "client-id.apps.googleusercontent.com",
-      clientSecret: "placeholder",
-    }),
-  );
-  return { config, directory };
+  const auth = new OAuth2Client({
+    clientId: "client-id.apps.googleusercontent.com",
+    clientSecret: "placeholder",
+  });
+  return {
+    config,
+    directory: {
+      users: new DirectoryService(auth),
+      domains: new DomainsService(auth),
+      groups: new GroupsService(auth),
+      orgUnits: new OrgUnitsService(auth),
+      roles: new RolesService(auth),
+      devices: new DevicesService(auth),
+      userSecurity: new UserSecurityService(auth),
+    },
+  };
 }
 
 describe("tool registration invariants", () => {
