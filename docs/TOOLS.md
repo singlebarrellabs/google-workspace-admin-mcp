@@ -12,6 +12,8 @@ is a bug.
 | `gws_users_create` | directory | yes | Never sets `isAdmin`; forces a password change. |
 | `gws_users_update` | directory | yes | PATCH only; omitted fields keep their values. |
 | `gws_users_suspend` | directory | yes | Destructive; needs `confirm: true`. |
+| `gws_group_settings_get` | groups-settings | no | Grouped settings; unknown keys under `other`. |
+| `gws_group_settings_update` | groups-settings | yes | Only supplied fields; bad names refused. |
 | `gws_licenses_list` | licensing | no | Assignments by product, optionally by SKU. |
 | `gws_licenses_get` | licensing | no | One assignment. |
 | `gws_licenses_assign` | licensing | yes | Destructive; consumes a paid seat. |

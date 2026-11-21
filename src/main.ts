@@ -11,6 +11,7 @@ import { DevicesService } from "./services/devices.js";
 import { DirectoryService } from "./services/directory.js";
 import { GroupsService } from "./services/directory-groups.js";
 import { DomainsService } from "./services/domains.js";
+import { GroupSettingsService } from "./services/group-settings.js";
 import { LicensingService } from "./services/licensing.js";
 import { OrgUnitsService } from "./services/orgunits.js";
 import { ReportsService } from "./services/reports.js";
@@ -43,6 +44,7 @@ async function main(): Promise<void> {
   const { server } = buildServer({
     config,
     token,
+    groupSettings: auth ? new GroupSettingsService(auth) : undefined,
     licensing: auth ? new LicensingService(auth) : undefined,
     passthrough:
       auth && config.passthrough ? passthroughTools({ auth, mode: config.mode }) : undefined,

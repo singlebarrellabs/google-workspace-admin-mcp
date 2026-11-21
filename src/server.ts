@@ -6,10 +6,12 @@ import type { StoredToken } from "./auth/token-store.js";
 import type { AnyToolSpec } from "./catalog.js";
 import { AuditLog } from "./safety/audit.js";
 import { requireConfirm, toolsForMode } from "./safety/policy.js";
+import type { GroupSettingsService } from "./services/group-settings.js";
 import type { LicensingService } from "./services/licensing.js";
 import type { ReportsService } from "./services/reports.js";
 import type { DirectoryServices } from "./tools/directory.js";
 import { directoryTools } from "./tools/directory.js";
+import { groupSettingsTools } from "./tools/group-settings.js";
 import { licensingTools } from "./tools/licensing.js";
 import { reportsTools } from "./tools/reports.js";
 import { systemTools } from "./tools/system.js";
@@ -18,6 +20,7 @@ import { mapGoogleError, ToolError } from "./util/errors.js";
 export interface ServerDeps {
   config: AppConfig;
   token?: StoredToken;
+  groupSettings?: GroupSettingsService;
   licensing?: LicensingService;
   /** Built by main when GWS_PASSTHROUGH is on; absent means no passthrough tool. */
   passthrough?: AnyToolSpec[];
@@ -32,6 +35,7 @@ export function buildServer(deps: ServerDeps): { server: McpServer; tools: strin
   const specs: AnyToolSpec[] = [
     ...systemTools({ config, token, edition: deps.edition }),
     ...(deps.directory ? directoryTools(deps.directory) : []),
+    ...(deps.groupSettings ? groupSettingsTools(deps.groupSettings) : []),
     ...(deps.licensing ? licensingTools(deps.licensing) : []),
     ...(deps.passthrough ?? []),
     ...(deps.reports ? reportsTools(deps.reports) : []),
