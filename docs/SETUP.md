@@ -206,6 +206,11 @@ status, not message bodies.
 `npm run docs:scopes` regenerates this block from `ADMIN_SCOPES`, and a test
 fails when the two disagree.
 
+The names are also checked against the providers' published discovery
+documents (`docs/api/scopes.json`): a scope no enabled API publishes fails the
+test suite, because Google rejects the whole consent request when one scope is
+wrong. `npm run api:scopes` refreshes the snapshot after an API change.
+
 ## Troubleshooting
 
 | Symptom | Cause | Fix |
