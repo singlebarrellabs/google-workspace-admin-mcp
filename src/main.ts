@@ -5,6 +5,7 @@ import { loadConfig } from "./auth/config.js";
 import { EditionProbe } from "./auth/edition.js";
 import { authorize, createOAuthClient } from "./auth/oauth.js";
 import { FileTokenStore } from "./auth/token-store.js";
+import { passthroughTools } from "./passthrough/dispatch.js";
 import { buildServer } from "./server.js";
 import { DevicesService } from "./services/devices.js";
 import { DirectoryService } from "./services/directory.js";
@@ -41,6 +42,8 @@ async function main(): Promise<void> {
   const { server } = buildServer({
     config,
     token,
+    passthrough:
+      auth && config.passthrough ? passthroughTools({ auth, mode: config.mode }) : undefined,
     directory: auth
       ? {
           users: new DirectoryService(auth),

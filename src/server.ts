@@ -16,6 +16,8 @@ import { mapGoogleError, ToolError } from "./util/errors.js";
 export interface ServerDeps {
   config: AppConfig;
   token?: StoredToken;
+  /** Built by main when GWS_PASSTHROUGH is on; absent means no passthrough tool. */
+  passthrough?: AnyToolSpec[];
   directory?: DirectoryServices;
   edition?: EditionProbe;
   reports?: ReportsService;
@@ -27,6 +29,7 @@ export function buildServer(deps: ServerDeps): { server: McpServer; tools: strin
   const specs: AnyToolSpec[] = [
     ...systemTools({ config, token, edition: deps.edition }),
     ...(deps.directory ? directoryTools(deps.directory) : []),
+    ...(deps.passthrough ?? []),
     ...(deps.reports ? reportsTools(deps.reports) : []),
   ];
 
@@ -46,7 +49,7 @@ export function buildServer(deps: ServerDeps): { server: McpServer; tools: strin
           const result = await spec.run(parsed, { dryRun: false });
           await audit.append({
             tool: spec.name,
-            access: spec.access,
+            access: result.access ?? spec.access,
             outcome: "ok",
             durationMs: Date.now() - started,
             args: parsed,

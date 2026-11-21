@@ -12,6 +12,10 @@ is a bug.
 | `gws_users_create` | directory | yes | Never sets `isAdmin`; forces a password change. |
 | `gws_users_update` | directory | yes | PATCH only; omitted fields keep their values. |
 | `gws_users_suspend` | directory | yes | Destructive; needs `confirm: true`. |
+| `gws_passthrough_directory` | directory | yes | Off by default; writes need write mode. |
+| `gws_passthrough_reports` | reports | no | Off unless `GWS_PASSTHROUGH=on`. |
+| `gws_passthrough_vault` | vault | no | Off unless `GWS_PASSTHROUGH=on`. |
+| `gws_passthrough_transfer` | transfer | no | Off unless `GWS_PASSTHROUGH=on`. |
 | `gws_users_unsuspend` | directory | yes | Restores sign-in; sessions do not resume. |
 | `gws_users_move` | directory | yes | Destructive; destination policies apply at once. |
 | `gws_users_delete` | directory | yes | Destructive; restorable for 20 days. |
@@ -64,6 +68,9 @@ is a bug.
 
 - Names are `gws_<surface>_<verb>`, for example `gws_users_list`.
 - `Mutating: yes` tools are absent when read-only mode is enabled.
+- Passthrough is the one exception: one tool per API carries both read and write
+  methods, so it stays registered and refuses write methods at call time while
+  the server is read-only. Unlisted methods are rejected with the permitted list.
 - Destructive tools require an explicit confirm argument; the tool description
   states what becomes irreversible.
 - Edition-restricted tools (Vault, Cloud Search) say so in their description.
