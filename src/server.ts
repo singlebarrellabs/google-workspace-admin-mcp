@@ -6,9 +6,8 @@ import type { StoredToken } from "./auth/token-store.js";
 import type { AnyToolSpec } from "./catalog.js";
 import { AuditLog } from "./safety/audit.js";
 import { requireConfirm, toolsForMode } from "./safety/policy.js";
-import type { DirectoryService } from "./services/directory.js";
-import type { DomainsService } from "./services/domains.js";
 import type { ReportsService } from "./services/reports.js";
+import type { DirectoryServices } from "./tools/directory.js";
 import { directoryTools } from "./tools/directory.js";
 import { reportsTools } from "./tools/reports.js";
 import { systemTools } from "./tools/system.js";
@@ -17,9 +16,8 @@ import { mapGoogleError, ToolError } from "./util/errors.js";
 export interface ServerDeps {
   config: AppConfig;
   token?: StoredToken;
+  directory?: DirectoryServices;
   edition?: EditionProbe;
-  directory?: DirectoryService;
-  domains?: DomainsService;
   reports?: ReportsService;
 }
 
@@ -28,7 +26,7 @@ export function buildServer(deps: ServerDeps): { server: McpServer; tools: strin
   const audit = new AuditLog(config.auditPath);
   const specs: AnyToolSpec[] = [
     ...systemTools({ config, token, edition: deps.edition }),
-    ...(deps.directory && deps.domains ? directoryTools(deps.directory, deps.domains) : []),
+    ...(deps.directory ? directoryTools(deps.directory) : []),
     ...(deps.reports ? reportsTools(deps.reports) : []),
   ];
 

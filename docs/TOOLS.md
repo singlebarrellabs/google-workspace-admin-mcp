@@ -23,6 +23,20 @@ is a bug.
 | `gws_domains_get` | directory | no | One domain. |
 | `gws_domain_aliases_list` | directory | no | Domain aliases, optionally by parent domain. |
 | `gws_domain_aliases_get` | directory | no | One domain alias. |
+| `gws_groups_list` | directory | no | Pages groups; searchable. |
+| `gws_groups_get` | directory | no | One group with member count and aliases. |
+| `gws_groups_create` | directory | yes | Address must be in an owned domain. |
+| `gws_groups_update` | directory | yes | PATCH; the other field keeps its value. |
+| `gws_groups_delete` | directory | yes | Destructive; mail to the address stops. |
+| `gws_members_list` | directory | no | Members, filterable by role. |
+| `gws_members_get` | directory | no | One membership with role and status. |
+| `gws_members_add` | directory | yes | Role is explicit; OWNER can manage the group. |
+| `gws_members_remove` | directory | yes | The member's account is untouched. |
+| `gws_orgunits_list` | directory | no | Whole tree, one level, or one unit. |
+| `gws_orgunits_get` | directory | no | Path, parent and inheritance flag. |
+| `gws_orgunits_create` | directory | yes | New unit starts on Google's defaults. |
+| `gws_orgunits_update` | directory | yes | Reads first: the API has no partial update. |
+| `gws_orgunits_delete` | directory | yes | Destructive; the unit must already be empty. |
 | `gws_activities_list` | reports | no | Flat event rows; 7-day default range; 500-row cap. |
 | `gws_usage_customer_get` | reports | no | Customer usage for one date; empty is not an error. |
 | `gws_usage_user_get` | reports | no | Per-user usage with filters and org unit scope. |
