@@ -3,8 +3,9 @@ name: CI
 on:
   push:
     branches: [main]
+  # Every pull request, whatever its base: a stacked PR targets the branch
+  # below it, and filtering on main silently left those without a run.
   pull_request:
-    branches: [main]
 
 jobs:
   test:

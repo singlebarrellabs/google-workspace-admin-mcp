@@ -10,6 +10,7 @@ export const ADMIN_SCOPES = [
   "https://www.googleapis.com/auth/admin.directory.group.member",
   "https://www.googleapis.com/auth/admin.directory.orgunit",
   "https://www.googleapis.com/auth/admin.directory.device.mobile",
+  "https://www.googleapis.com/auth/admin.directory.device.chromeos",
   "https://www.googleapis.com/auth/admin.directory.rolemanagement",
   "https://www.googleapis.com/auth/admin.directory.domain",
   "https://www.googleapis.com/auth/admin.directory.customer.readonly",
@@ -22,7 +23,7 @@ export const ADMIN_SCOPES = [
   "https://www.googleapis.com/auth/apps.licensing",
   "https://www.googleapis.com/auth/ediscovery",
   "https://www.googleapis.com/auth/cloud_search.query",
-  "https://www.googleapis.com/auth/groupssettings",
+  "https://www.googleapis.com/auth/apps.groups.settings",
 ] as const;
 
 const USER_CONTENT =

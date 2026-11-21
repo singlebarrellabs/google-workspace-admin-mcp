@@ -84,6 +84,15 @@ export function mapGoogleError(error: unknown, surface?: string): ToolError {
   }
 
   if (status === 403) {
+    // Group settings reject non-owners on their own terms, and the generic
+    // "grant a role" advice would send the caller to the wrong place.
+    if (surface === "groups-settings") {
+      return new ToolError(
+        "permission_denied",
+        `Only owners and managers of the group can change its settings: ${detail || "permission denied"}.`,
+        "Ask a group owner to make you a manager, then retry.",
+      );
+    }
     return new ToolError(
       "permission_denied",
       `The signed-in administrator is not allowed to do this: ${detail || "permission denied"}.`,

@@ -14,7 +14,6 @@ export const ALLOWLIST: AllowlistedMethod[] = [
   { api: "directory", method: "groups.list", access: "read" },
   { api: "directory", method: "orgunits.list", access: "read" },
   { api: "reports", method: "activities.list", access: "read" },
-  { api: "alerts", method: "alerts.list", access: "read" },
   { api: "vault", method: "matters.list", access: "read" },
   { api: "transfer", method: "transfers.list", access: "read" },
 ];
