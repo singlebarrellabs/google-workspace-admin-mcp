@@ -13,7 +13,7 @@ export interface OrgUnitRow {
 
 export interface ListOrgUnitsArgs {
   orgUnitPath?: string;
-  type?: "all" | "children" | "self";
+  type?: "all" | "children" | "allIncludingParent";
 }
 
 export interface CreateOrgUnitArgs {
