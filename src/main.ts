@@ -15,6 +15,7 @@ import { GroupSettingsService } from "./services/group-settings.js";
 import { LicensingService } from "./services/licensing.js";
 import { OrgUnitsService } from "./services/orgunits.js";
 import { ReportsService } from "./services/reports.js";
+import { ResourcesService } from "./services/resources.js";
 import { RolesService } from "./services/roles.js";
 import { UserSecurityService } from "./services/user-security.js";
 
@@ -44,6 +45,7 @@ async function main(): Promise<void> {
   const { server } = buildServer({
     config,
     token,
+    resources: auth ? new ResourcesService(auth) : undefined,
     groupSettings: auth ? new GroupSettingsService(auth) : undefined,
     licensing: auth ? new LicensingService(auth) : undefined,
     passthrough:
