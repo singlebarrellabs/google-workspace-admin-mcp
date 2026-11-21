@@ -2,11 +2,20 @@
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import type { OAuth2Client } from "google-auth-library";
 import { loadConfig } from "./auth/config.js";
+import { EditionProbe } from "./auth/edition.js";
 import { authorize, createOAuthClient } from "./auth/oauth.js";
 import { FileTokenStore } from "./auth/token-store.js";
+import { passthroughTools } from "./passthrough/dispatch.js";
 import { buildServer } from "./server.js";
+import { DevicesService } from "./services/devices.js";
 import { DirectoryService } from "./services/directory.js";
+import { GroupsService } from "./services/directory-groups.js";
+import { DomainsService } from "./services/domains.js";
 import { LicensingService } from "./services/licensing.js";
+import { OrgUnitsService } from "./services/orgunits.js";
+import { ReportsService } from "./services/reports.js";
+import { RolesService } from "./services/roles.js";
+import { UserSecurityService } from "./services/user-security.js";
 
 const VERSION = "0.1.0";
 
@@ -34,8 +43,22 @@ async function main(): Promise<void> {
   const { server } = buildServer({
     config,
     token,
-    directory: auth ? new DirectoryService(auth) : undefined,
     licensing: auth ? new LicensingService(auth) : undefined,
+    passthrough:
+      auth && config.passthrough ? passthroughTools({ auth, mode: config.mode }) : undefined,
+    directory: auth
+      ? {
+          users: new DirectoryService(auth),
+          domains: new DomainsService(auth),
+          groups: new GroupsService(auth),
+          orgUnits: new OrgUnitsService(auth),
+          roles: new RolesService(auth),
+          devices: new DevicesService(auth),
+          userSecurity: new UserSecurityService(auth),
+        }
+      : undefined,
+    edition: auth ? new EditionProbe(auth) : undefined,
+    reports: auth ? new ReportsService(auth) : undefined,
   });
 
   await server.connect(new StdioServerTransport());
