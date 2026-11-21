@@ -2,12 +2,23 @@ import type { OAuth2Client } from "google-auth-library";
 import { type admin_directory_v1, google } from "googleapis";
 import { mapGoogleError } from "../util/errors.js";
 
+/** Mirrors Directory API BuildingAddress; regionCode is the CLDR country code. */
+export interface BuildingAddress {
+  addressLines?: string[];
+  locality?: string;
+  administrativeArea?: string;
+  postalCode?: string;
+  regionCode?: string;
+  languageCode?: string;
+  sublocality?: string;
+}
+
 export interface BuildingRow {
   buildingId?: string;
   buildingName?: string;
   description?: string;
   floorNames?: string[];
-  address?: Record<string, string>;
+  address?: BuildingAddress;
   coordinates?: { latitude?: number; longitude?: number };
 }
 
@@ -81,7 +92,7 @@ export class ResourcesService {
     buildingName: string;
     description?: string;
     floorNames?: string[];
-    address?: BuildingRow["address"];
+    address?: BuildingAddress;
   }): Promise<BuildingRow> {
     try {
       const response = await this.client.resources.buildings.insert({
@@ -125,7 +136,7 @@ export class ResourcesService {
       const response = await this.client.resources.calendars.list({
         customer: "my_customer",
         maxResults: args.maxResults ?? 100,
-        ...(args.buildingId ? { buildingId: args.buildingId } : {}),
+        ...(args.buildingId ? { query: `buildingId=${args.buildingId}` } : {}),
         ...(args.pageToken ? { pageToken: args.pageToken } : {}),
       });
       return {
@@ -150,6 +161,7 @@ export class ResourcesService {
   }
 
   async createRoom(args: {
+    resourceId: string;
     resourceName: string;
     buildingId: string;
     capacity?: number;
@@ -162,6 +174,7 @@ export class ResourcesService {
       const response = await this.client.resources.calendars.insert({
         customer: "my_customer",
         requestBody: {
+          resourceId: args.resourceId,
           resourceName: args.resourceName,
           buildingId: args.buildingId,
           ...(args.capacity === undefined ? {} : { capacity: args.capacity }),
@@ -275,9 +288,7 @@ function toBuildingRow(building: admin_directory_v1.Schema$Building): BuildingRo
     ...(building.buildingName ? { buildingName: building.buildingName } : {}),
     ...(building.description ? { description: building.description } : {}),
     ...(building.floorNames?.length ? { floorNames: building.floorNames } : {}),
-    ...(building.address
-      ? { address: stripNulls(building.address) as Record<string, string> }
-      : {}),
+    ...(building.address ? { address: stripNulls(building.address) as BuildingAddress } : {}),
     ...(building.coordinates
       ? {
           coordinates: stripNulls(building.coordinates) as {

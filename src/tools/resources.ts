@@ -12,11 +12,13 @@ const buildingShape = {
 };
 
 const addressShape = z.object({
-  streetAddress: z.string().optional(),
-  locality: z.string().optional(),
-  region: z.string().optional(),
+  addressLines: z.array(z.string()).optional().describe("Street address lines"),
+  locality: z.string().optional().describe("City or town"),
+  administrativeArea: z.string().optional().describe("State or region"),
   postalCode: z.string().optional(),
-  country: z.string().optional(),
+  regionCode: z.string().min(2).max(2).optional().describe("CLDR country code, for example US"),
+  languageCode: z.string().optional().describe("BCP-47 language of the address"),
+  sublocality: z.string().optional(),
 });
 
 const createBuildingShape = {
@@ -48,6 +50,10 @@ const roomShape = {
 };
 
 const createRoomShape = {
+  resourceId: z
+    .string()
+    .min(1)
+    .describe("Caller-supplied immutable id; the API does not generate one"),
   resourceName: z.string().min(1).describe('Room name, for example "Aurora"'),
   buildingId: z.string().min(1).describe("Building the room sits in"),
   capacity: z.number().int().min(0).optional().describe("Seats"),
@@ -175,7 +181,10 @@ export function resourceTools(service: ResourcesService): Array<ToolSpec | Confi
       edition: "all",
       description:
         "List calendar resources (rooms) with capacity, floor and feature assignments, optionally for one building.",
-      inputShape: { ...pageShape, buildingId: z.string().optional().describe("Only rooms here") },
+      inputShape: {
+        ...pageShape,
+        buildingId: z.string().optional().describe("Only rooms in this building"),
+      },
       run: async (input) => {
         const args = z.object({ ...pageShape, buildingId: z.string().optional() }).parse(input);
         const result = await service.listRooms(args);

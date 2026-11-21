@@ -29,7 +29,13 @@ describe("buildings", () => {
             buildingId: "b1",
             buildingName: "HQ",
             floorNames: ["1", "2"],
-            address: { locality: "Longmont", region: "CO", postalCode: "80501" },
+            address: {
+              addressLines: ["1 Main St"],
+              locality: "Longmont",
+              administrativeArea: "CO",
+              postalCode: "80501",
+              regionCode: "US",
+            },
           },
         ],
         nextPageToken: "page-2",
@@ -41,7 +47,13 @@ describe("buildings", () => {
       buildingId: "b1",
       buildingName: "HQ",
       floorNames: ["1", "2"],
-      address: { locality: "Longmont", region: "CO", postalCode: "80501" },
+      address: {
+        addressLines: ["1 Main St"],
+        locality: "Longmont",
+        administrativeArea: "CO",
+        postalCode: "80501",
+        regionCode: "US",
+      },
     });
     expect(result.nextPageToken).toBe("page-2");
   });
@@ -93,7 +105,7 @@ describe("rooms", () => {
     const scope = nock("https://admin.googleapis.com")
       .get(`${root}/calendars`)
       .query((query) => {
-        expect(query.buildingId).toBe("b1");
+        expect(query.query).toBe("buildingId=b1");
         return true;
       })
       .reply(200, {
@@ -125,6 +137,7 @@ describe("rooms", () => {
   it("creates a room with its capacity", async () => {
     const scope = nock("https://admin.googleapis.com")
       .post(`${root}/calendars`, {
+        resourceId: "r1",
         resourceName: "Aurora",
         buildingId: "b1",
         capacity: 8,
@@ -133,6 +146,7 @@ describe("rooms", () => {
       .reply(200, { resourceId: "r1", resourceName: "Aurora", capacity: 8 });
 
     const room = await service().createRoom({
+      resourceId: "r1",
       resourceName: "Aurora",
       buildingId: "b1",
       capacity: 8,
