@@ -49,13 +49,22 @@ export class UserSecurityService {
    * Issues new backup codes, which replace any existing ones. The codes are
    * returned because the admin hands them over; they are a credential.
    */
+  /**
+   * `verificationCodes.generate` documents no response body, so the new codes
+   * are read from `verificationCodes.list`, which does.
+   */
   async generateVerificationCodes(userKey: string): Promise<VerificationCodeRow[]> {
     try {
-      // The generated typings declare `void`, but the REST API returns the new
-      // list of codes. Read the body rather than reporting an empty result.
-      const response = (await this.client.verificationCodes.generate({ userKey })) as unknown as {
-        data: admin_directory_v1.Schema$VerificationCodes;
-      };
+      await this.client.verificationCodes.generate({ userKey });
+      return await this.listVerificationCodes(userKey);
+    } catch (error) {
+      throw mapGoogleError(error, "directory");
+    }
+  }
+
+  async listVerificationCodes(userKey: string): Promise<VerificationCodeRow[]> {
+    try {
+      const response = await this.client.verificationCodes.list({ userKey });
       return (response.data.items ?? []).map((code) => ({
         ...(code.userId ? { userId: code.userId } : {}),
         ...(code.verificationCode ? { verificationCode: code.verificationCode } : {}),

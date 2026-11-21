@@ -90,15 +90,24 @@ describe("chromeos devices", () => {
     expect(result.items[0].orgUnitPath).toBe("/Engineering");
   });
 
-  it("deprovisions through the fleet action", async () => {
+  it("deprovisions through the fleet action, naming the reason", async () => {
     const scope = nock("https://admin.googleapis.com")
-      .post(`${chromeOsPath}/c1/action`, { action: "deprovision" })
+      .post(`${chromeOsPath}/c1/action`, {
+        action: "deprovision",
+        deprovisionReason: "RETIRE",
+      })
       .query(true)
       .reply(200, {});
 
-    await new DevicesService(auth()).chromeOsAction("c1", "deprovision");
+    await new DevicesService(auth()).chromeOsAction("c1", "deprovision", "RETIRE");
 
     expect(scope.isDone()).toBe(true);
+  });
+
+  it("refuses a deprovision without a reason before calling the API", async () => {
+    await expect(
+      new DevicesService(auth()).chromeOsAction("c1", "deprovision"),
+    ).rejects.toMatchObject({ category: "invalid_request" });
   });
 
   it("maps a 404 to not_found", async () => {
@@ -157,6 +166,10 @@ describe("user security", () => {
   it("returns the issued backup codes instead of an empty list", async () => {
     nock("https://admin.googleapis.com")
       .post("/admin/directory/v1/users/user-3%40example.com/verificationCodes/generate")
+      .query(true)
+      .reply(200, {});
+    nock("https://admin.googleapis.com")
+      .get("/admin/directory/v1/users/user-3%40example.com/verificationCodes")
       .query(true)
       .reply(200, {
         kind: "admin#directory#verificationCodesList",

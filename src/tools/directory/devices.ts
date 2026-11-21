@@ -2,8 +2,13 @@ import { z } from "zod";
 import type { ConfirmedToolSpec, ToolSpec } from "../../catalog.js";
 import { CHROMEOS_ACTIONS, type DevicesService, MOBILE_ACTIONS } from "../../services/devices.js";
 
-const listShape = {
-  maxResults: z.number().int().min(1).max(200).optional().describe("Page size, default 100"),
+const mobileListShape = {
+  maxResults: z.number().int().min(1).max(100).optional().describe("Page size, default 100"),
+  pageToken: z.string().optional().describe("Token from a previous call"),
+};
+
+const chromeOsListShape = {
+  maxResults: z.number().int().min(1).max(300).optional().describe("Page size, default 100"),
   pageToken: z.string().optional().describe("Token from a previous call"),
 };
 
@@ -26,6 +31,10 @@ const chromeOsActionShape = {
   action: z
     .enum(CHROMEOS_ACTIONS)
     .describe("disable and reenable are reversible; deprovision is not"),
+  deprovisionReason: z
+    .string()
+    .optional()
+    .describe("Required when the action is deprovision; for example RETIRE or UPGRADE"),
   confirm: z.boolean().optional().describe("Must be true. Fleet actions change the device now"),
 };
 
@@ -39,9 +48,9 @@ export function deviceTools(service: DevicesService): Array<ToolSpec | Confirmed
       access: "read",
       edition: "all",
       description: "List enrolled mobile devices with model, OS, status, owner and last sync.",
-      inputShape: listShape,
+      inputShape: mobileListShape,
       run: async (input) => {
-        const args = z.object(listShape).parse(input);
+        const args = z.object(mobileListShape).parse(input);
         const result = await service.listMobileDevices(args);
         return {
           summary: `${result.items.length} device${result.items.length === 1 ? "" : "s"}${
@@ -91,9 +100,9 @@ export function deviceTools(service: DevicesService): Array<ToolSpec | Confirmed
       access: "read",
       edition: "all",
       description: "List ChromeOS devices with serial, model, status, org unit and annotated user.",
-      inputShape: listShape,
+      inputShape: chromeOsListShape,
       run: async (input) => {
-        const args = z.object(listShape).parse(input);
+        const args = z.object(chromeOsListShape).parse(input);
         const result = await service.listChromeOsDevices(args);
         return {
           summary: `${result.items.length} device${result.items.length === 1 ? "" : "s"}${
@@ -131,7 +140,11 @@ export function deviceTools(service: DevicesService): Array<ToolSpec | Confirmed
       inputShape: chromeOsActionShape,
       run: async (input) => {
         const args = z.object(chromeOsActionShape).parse(input);
-        const result = await service.chromeOsAction(args.resourceId, args.action);
+        const result = await service.chromeOsAction(
+          args.resourceId,
+          args.action,
+          args.deprovisionReason,
+        );
         return { summary: `${args.action} sent to ${args.resourceId}`, data: result };
       },
     },

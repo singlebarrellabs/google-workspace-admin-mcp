@@ -1,6 +1,6 @@
 import type { OAuth2Client } from "google-auth-library";
 import { type admin_directory_v1, google } from "googleapis";
-import { mapGoogleError } from "../util/errors.js";
+import { mapGoogleError, ToolError } from "../util/errors.js";
 
 export const MOBILE_ACTIONS = [
   "admin_remote_wipe",
@@ -132,12 +132,24 @@ export class DevicesService {
   async chromeOsAction(
     resourceId: string,
     action: (typeof CHROMEOS_ACTIONS)[number],
+    deprovisionReason?: string,
   ): Promise<{ resourceId: string; action: string }> {
+    if (action === "deprovision" && !deprovisionReason) {
+      throw new ToolError(
+        "invalid_request",
+        "A deprovision action needs a deprovisionReason.",
+        "Pass the reason the device is being retired, upgraded or replaced.",
+      );
+    }
+
     try {
       await this.client.chromeosdevices.action({
         customerId: "my_customer",
         resourceId,
-        requestBody: { action },
+        requestBody: {
+          action,
+          ...(action === "deprovision" && deprovisionReason ? { deprovisionReason } : {}),
+        },
       });
       return { resourceId, action };
     } catch (error) {
