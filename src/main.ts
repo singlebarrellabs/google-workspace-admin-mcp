@@ -20,6 +20,7 @@ import { ResourcesService } from "./services/resources.js";
 import { RolesService } from "./services/roles.js";
 import { TransferService } from "./services/transfer.js";
 import { UserSecurityService } from "./services/user-security.js";
+import { VaultService } from "./services/vault.js";
 
 const VERSION = "0.1.0";
 
@@ -47,6 +48,7 @@ async function main(): Promise<void> {
   const { server } = buildServer({
     config,
     token,
+    vault: auth ? new VaultService(auth) : undefined,
     cloudSearch: auth ? new CloudSearchService(auth) : undefined,
     transfer: auth ? new TransferService(auth) : undefined,
     resources: auth ? new ResourcesService(auth) : undefined,
