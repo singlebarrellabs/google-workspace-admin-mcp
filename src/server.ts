@@ -1,6 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import type { AppConfig } from "./auth/config.js";
+import type { EditionProbe } from "./auth/edition.js";
 import type { StoredToken } from "./auth/token-store.js";
 import type { AnyToolSpec } from "./catalog.js";
 import { AuditLog } from "./safety/audit.js";
@@ -15,6 +16,7 @@ import { mapGoogleError, ToolError } from "./util/errors.js";
 export interface ServerDeps {
   config: AppConfig;
   token?: StoredToken;
+  edition?: EditionProbe;
   directory?: DirectoryService;
   reports?: ReportsService;
 }
@@ -23,7 +25,7 @@ export function buildServer(deps: ServerDeps): { server: McpServer; tools: strin
   const { config, token } = deps;
   const audit = new AuditLog(config.auditPath);
   const specs: AnyToolSpec[] = [
-    ...systemTools({ config, token }),
+    ...systemTools({ config, token, edition: deps.edition }),
     ...(deps.directory ? directoryTools(deps.directory) : []),
     ...(deps.reports ? reportsTools(deps.reports) : []),
   ];
