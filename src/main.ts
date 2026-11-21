@@ -6,11 +6,14 @@ import { EditionProbe } from "./auth/edition.js";
 import { authorize, createOAuthClient } from "./auth/oauth.js";
 import { FileTokenStore } from "./auth/token-store.js";
 import { buildServer } from "./server.js";
+import { DevicesService } from "./services/devices.js";
 import { DirectoryService } from "./services/directory.js";
 import { GroupsService } from "./services/directory-groups.js";
 import { DomainsService } from "./services/domains.js";
 import { OrgUnitsService } from "./services/orgunits.js";
 import { ReportsService } from "./services/reports.js";
+import { RolesService } from "./services/roles.js";
+import { UserSecurityService } from "./services/user-security.js";
 
 const VERSION = "0.1.0";
 
@@ -44,6 +47,9 @@ async function main(): Promise<void> {
           domains: new DomainsService(auth),
           groups: new GroupsService(auth),
           orgUnits: new OrgUnitsService(auth),
+          roles: new RolesService(auth),
+          devices: new DevicesService(auth),
+          userSecurity: new UserSecurityService(auth),
         }
       : undefined,
     edition: auth ? new EditionProbe(auth) : undefined,

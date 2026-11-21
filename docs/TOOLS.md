@@ -37,6 +37,24 @@ is a bug.
 | `gws_orgunits_create` | directory | yes | New unit starts on Google's defaults. |
 | `gws_orgunits_update` | directory | yes | Reads first: the API has no partial update. |
 | `gws_orgunits_delete` | directory | yes | Destructive; the unit must already be empty. |
+| `gws_roles_list` | directory | no | Custom and system roles. |
+| `gws_privileges_list` | directory | no | Privilege names a custom role can hold. |
+| `gws_roles_create` | directory | yes | Custom role from an explicit privilege list. |
+| `gws_roles_delete` | directory | yes | Destructive; unassigned custom roles only. |
+| `gws_role_assignments_list` | directory | no | By user or by role. |
+| `gws_role_assignments_create` | directory | yes | Grants real admin capability at once. |
+| `gws_role_assignments_delete` | directory | yes | Destructive; privileges end immediately. |
+| `gws_devices_mobile_list` | directory | no | Enrolled phones and tablets. |
+| `gws_devices_mobile_get` | directory | no | One mobile device. |
+| `gws_devices_mobile_action` | directory | yes | Destructive; wipes cannot be undone. |
+| `gws_devices_chromeos_list` | directory | no | ChromeOS fleet with serial and org unit. |
+| `gws_devices_chromeos_get` | directory | no | One ChromeOS device. |
+| `gws_devices_chromeos_action` | directory | yes | Destructive; deprovision leaves management. |
+| `gws_user_tokens_list` | directory | no | Third-party app grants and their scopes. |
+| `gws_user_tokens_delete` | directory | yes | Destructive; the app must re-consent. |
+| `gws_user_verification_codes_generate` | directory | yes | Destructive; supersedes the old set. |
+| `gws_user_verification_codes_invalidate` | directory | yes | Destructive; may lock the user out. |
+| `gws_user_sign_out` | directory | yes | Destructive; every session ends. |
 | `gws_activities_list` | reports | no | Flat event rows; 7-day default range; 500-row cap. |
 | `gws_usage_customer_get` | reports | no | Customer usage for one date; empty is not an error. |
 | `gws_usage_user_get` | reports | no | Per-user usage with filters and org unit scope. |
