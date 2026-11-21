@@ -3,7 +3,6 @@ import type { ZodRawShape } from "zod";
 export type Surface =
   | "directory"
   | "reports"
-  | "alerts"
   | "vault"
   | "cloud-search"
   | "transfer"
@@ -19,6 +18,11 @@ export type Edition = "all" | "enterprise";
 export interface ToolResult {
   summary: string;
   data?: unknown;
+  /**
+   * Effective access for a tool that can do both, such as passthrough. The
+   * audit log records this instead of the registration class.
+   */
+  access?: Access;
 }
 
 export interface ToolContext {
