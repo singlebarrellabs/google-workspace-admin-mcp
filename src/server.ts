@@ -1,29 +1,35 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import type { AppConfig } from "./auth/config.js";
+import type { EditionProbe } from "./auth/edition.js";
 import type { StoredToken } from "./auth/token-store.js";
 import type { AnyToolSpec } from "./catalog.js";
 import { AuditLog } from "./safety/audit.js";
 import { requireConfirm, toolsForMode } from "./safety/policy.js";
 import type { DirectoryService } from "./services/directory.js";
 import type { DomainsService } from "./services/domains.js";
+import type { ReportsService } from "./services/reports.js";
 import { directoryTools } from "./tools/directory.js";
+import { reportsTools } from "./tools/reports.js";
 import { systemTools } from "./tools/system.js";
 import { mapGoogleError, ToolError } from "./util/errors.js";
 
 export interface ServerDeps {
   config: AppConfig;
   token?: StoredToken;
+  edition?: EditionProbe;
   directory?: DirectoryService;
   domains?: DomainsService;
+  reports?: ReportsService;
 }
 
 export function buildServer(deps: ServerDeps): { server: McpServer; tools: string[] } {
   const { config, token } = deps;
   const audit = new AuditLog(config.auditPath);
   const specs: AnyToolSpec[] = [
-    ...systemTools({ config, token }),
+    ...systemTools({ config, token, edition: deps.edition }),
     ...(deps.directory && deps.domains ? directoryTools(deps.directory, deps.domains) : []),
+    ...(deps.reports ? reportsTools(deps.reports) : []),
   ];
 
   const registered = toolsForMode(specs, config.mode);

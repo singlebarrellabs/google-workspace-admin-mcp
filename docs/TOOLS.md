@@ -5,7 +5,7 @@ is a bug.
 
 | Tool | Surface | Mutating | Notes |
 | --- | --- | --- | --- |
-| `gws_auth_status` | system | no | Credential state, token expiry, mode, scopes. |
+| `gws_auth_status` | system | no | Credential state, token expiry, mode, scopes, edition. |
 | `gws_scopes_list` | system | no | The admin-only scopes this server requests. |
 | `gws_users_list` | directory | no | Pages users; org unit becomes a query clause. |
 | `gws_users_get` | directory | no | One user with org unit, suspension and login state. |
@@ -23,6 +23,10 @@ is a bug.
 | `gws_domains_get` | directory | no | One domain. |
 | `gws_domain_aliases_list` | directory | no | Domain aliases, optionally by parent domain. |
 | `gws_domain_aliases_get` | directory | no | One domain alias. |
+| `gws_activities_list` | reports | no | Flat event rows; 7-day default range; 500-row cap. |
+| `gws_usage_customer_get` | reports | no | Customer usage for one date; empty is not an error. |
+| `gws_usage_user_get` | reports | no | Per-user usage with filters and org unit scope. |
+| `gws_usage_entity_get` | reports | no | Entity usage for one type and key. |
 
 ## Conventions
 
