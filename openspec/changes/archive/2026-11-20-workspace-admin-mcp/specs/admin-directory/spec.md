@@ -2,7 +2,8 @@
 
 ## Purpose
 
-Manages the tenant directory: users, aliases, domains, groups, org units, roles, devices and user security.
+Manages the tenant directory: users, aliases, domains, groups, org units, roles, devices and
+user security.
 
 ## ADDED Requirements
 

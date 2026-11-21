@@ -1,6 +1,7 @@
 # admin-transfer Specification
 
 ## Purpose
+
 Moves a departing user's data to another account and reports the status of each application.
 
 ## Requirements

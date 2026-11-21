@@ -1,6 +1,7 @@
 # admin-groups-settings Specification
 
 ## Purpose
+
 Reads and partially updates a group's membership, posting, moderation and delivery settings.
 
 ## Requirements

@@ -1,6 +1,7 @@
 # admin-resources Specification
 
 ## Purpose
+
 Manages calendar resources - buildings, rooms and features - so a room can be booked.
 
 ## Requirements

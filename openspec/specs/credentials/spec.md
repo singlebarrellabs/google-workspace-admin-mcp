@@ -1,7 +1,9 @@
 # credentials Specification
 
 ## Purpose
-Authenticates with one administrator-owned OAuth client, stores the token owner-only, and reports what the tenant can reach.
+
+Authenticates with one administrator-owned OAuth client, stores the token owner-only, and
+reports what the tenant can reach.
 
 ## Requirements
 

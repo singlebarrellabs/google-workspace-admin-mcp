@@ -1,7 +1,9 @@
 # safety-gates Specification
 
 ## Purpose
-Keeps the server read-only by default, gates destructive calls, audits every call, and turns API failures into actionable errors.
+
+Keeps the server read-only by default, gates destructive calls, audits every call, and turns API
+failures into actionable errors.
 
 ## Requirements
 

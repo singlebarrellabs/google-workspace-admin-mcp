@@ -1,7 +1,9 @@
 # admin-licensing Specification
 
 ## Purpose
-Lists, assigns and revokes Workspace licence seats so access matches what the subscription pays for.
+
+Lists, assigns and revokes Workspace licence seats so access matches what the subscription pays
+for.
 
 ## Requirements
 

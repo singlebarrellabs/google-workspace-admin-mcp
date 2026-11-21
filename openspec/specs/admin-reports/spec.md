@@ -1,7 +1,9 @@
 # admin-reports Specification
 
 ## Purpose
-Reports audit activity and usage, so an administrator can answer who did what and how much was used.
+
+Reports audit activity and usage, so an administrator can answer who did what and how much was
+used.
 
 ## Requirements
 

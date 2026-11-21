@@ -1,7 +1,9 @@
 # docs-setup Specification
 
 ## Purpose
-Documents setup, scopes, editions and smoke testing, from a clean Cloud project to a working server.
+
+Documents setup, scopes, editions and smoke testing, from a clean Cloud project to a working
+server.
 
 ## Requirements
 

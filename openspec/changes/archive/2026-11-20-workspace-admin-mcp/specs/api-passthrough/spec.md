@@ -2,7 +2,8 @@
 
 ## Purpose
 
-Allows one raw, allowlisted API call for what the curated tools do not cover, without widening the surface.
+Allows one raw, allowlisted API call for what the curated tools do not cover, without widening
+the surface.
 
 ## ADDED Requirements
 
