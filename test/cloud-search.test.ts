@@ -147,6 +147,25 @@ describe("cloud search suggest and sources", () => {
     expect(bare.isDone()).toBe(true);
   });
 
+  it("reports a project without the Query API as edition_unavailable", async () => {
+    nock("https://cloudsearch.googleapis.com")
+      .get("/v1/query/sources")
+      .query(true)
+      .reply(403, {
+        error: {
+          code: 403,
+          message:
+            "This project doesn't have Cloud Search's Query API Enabled, and/or the Cloud Search Platform license has not been assigned to the user account.",
+        },
+      });
+
+    const error = await service()
+      .listSources()
+      .catch((caught: unknown) => caught as { category: string });
+
+    expect(error.category).toBe("edition_unavailable");
+  });
+
   it("reports a tenant with Cloud Search disabled as edition_unavailable", async () => {
     nock("https://cloudsearch.googleapis.com")
       .get("/v1/query/sources")

@@ -138,11 +138,16 @@ function mapCloudSearchError(error: unknown): ToolError {
   const status = response?.status ?? (error as { code?: number }).code;
   const message = (error as { message?: string }).message ?? "";
 
-  if (status === 403 && /(must|not) be enabled/i.test(message)) {
+  if (
+    status === 403 &&
+    /(must|not) be enabled|doesn't have .*enabled|license has not been assigned|has not been assigned/i.test(
+      message,
+    )
+  ) {
     return new ToolError(
       "edition_unavailable",
-      "Cloud Search is not enabled for this tenant.",
-      "Enable Cloud Search in the Admin console under Apps → Additional Google services, then retry.",
+      "Cloud Search is not enabled for this project or tenant.",
+      "Enable Cloud Search Query API in the Cloud project and assign a Cloud Search license in the Admin console, then retry.",
     );
   }
 
