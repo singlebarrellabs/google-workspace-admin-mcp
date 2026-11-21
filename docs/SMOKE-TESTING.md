@@ -1,8 +1,13 @@
 # Smoke testing and tenant access
 
-This project is built without access to a live Google Workspace tenant. This
-document records how that works, what verification needs a human, and the rules
-that keep tenant data out of the repository and out of shared output.
+The server is verified two ways: fixtures in CI, and read-only smoke runs
+against a tenant the operator controls. This document covers the second, and the
+rules that keep tenant data out of the repository and out of shared output.
+
+The current tenant is a proof-of-concept workspace: directory, reports, transfer,
+licensing, groups settings and calendar resources have run live. Vault and Cloud
+Search report `unavailable` there because the tenant has neither, so those two
+surfaces are still fixture-only.
 
 ## Two verification tiers
 

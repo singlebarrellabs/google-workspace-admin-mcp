@@ -127,9 +127,40 @@ administrator, granted scopes, token expiry, mode, and which surfaces the tenant
 can use.
 
 If status says a surface is unavailable for edition reasons, that is a fact
-about the tenant, not a misconfiguration. See [Editions](#11-editions).
+about the tenant, not a misconfiguration. See [Editions](#12-editions).
 
-## 9. Grant the admin roles
+## 9. Connect a client
+
+The server speaks MCP over stdio. Point your client at `npx` and pass the two
+client variables; the token is read from the state directory, so `auth` only has
+to run once.
+
+```json
+{
+  "mcpServers": {
+    "gwa": {
+      "command": "npx",
+      "args": ["-y", "google-workspace-admin-mcp@latest"],
+      "env": {
+        "GWS_CLIENT_ID": "…",
+        "GWS_CLIENT_SECRET": "…",
+        "GWS_MODE": "readonly"
+      }
+    }
+  }
+}
+```
+
+- Claude Desktop and Claude Code read `mcpServers` from their own config file.
+- OpenCode reads the same command shape under `mcp.servers` (`"type": "local"`,
+  `"command": [...]`); if the client is launched from a shell that already
+  exports the variables, the `env` block can be dropped.
+- `GWS_MODE` is optional and defaults to `readonly`.
+
+Ask the server for `gws_auth_status` first; it reports the signed-in
+administrator, granted scopes, token expiry, mode and the edition it probed.
+
+## 10. Grant the admin roles
 
 The signed-in account needs the privilege for each surface you intend to use.
 A super admin has all of them; anything less should be a custom role.
@@ -150,7 +181,7 @@ Vault is the one that surprises people: an admin without **View All Matters**
 sees only the matters they created or that were shared with them. The tool says
 so by name when a matter is not visible.
 
-## 10. Choose a mode
+## 11. Choose a mode
 
 The server starts **read-only**. In that mode every mutating tool is absent from
 the tool list, not present and failing, so a model cannot talk itself into a
@@ -164,7 +195,7 @@ write.
 
 Start read-only, use it for a while, and only then enable writes.
 
-## 11. Editions
+## 12. Editions
 
 | Surface | Available on |
 | --- | --- |
@@ -220,7 +251,7 @@ wrong. `npm run api:scopes` refreshes the snapshot after an API change.
 | `auth_required` | Testing client, or revoked grant | Re-authorize, or use Internal |
 | `redirect_uri_mismatch` | Client is a Web application | Create a Desktop app client |
 | `invalid_client` | Secret is wrong or from another project | Copy both values again |
-| 403 on a surface you enabled | API not enabled, or role missing | Check step 3 and step 9 |
+| 403 on a surface you enabled | API not enabled, or role missing | Check step 3 and step 10 |
 | `edition_unavailable` | Tenant lacks Vault or Cloud Search | Use another surface |
 | Scripts see no token | Different `GWS_STATE_DIR` or user | Point both at the same path |
 

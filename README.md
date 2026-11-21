@@ -3,10 +3,9 @@
 An MCP server for the **Google Workspace admin plane**: the APIs that manage a
 tenant, not the ones that read a user's mail.
 
-> **Status: early development.** Surfaces land one branch at a time; the tool
-> list for the checked-out revision is in [`docs/TOOLS.md`](docs/TOOLS.md) and
-> setup is in [`docs/SETUP.md`](docs/SETUP.md). Track progress in the
-> [issues](https://github.com/singlebarrellabs/google-workspace-admin-mcp/issues).
+> **Status: 0.1.1.** Eight admin surfaces, 107 tools, published to npm.
+> [`docs/TOOLS.md`](docs/TOOLS.md) lists every tool; [`docs/SETUP.md`](docs/SETUP.md)
+> takes you from a clean Cloud project to a working server.
 
 ## Why
 
@@ -31,9 +30,10 @@ stated in a README:
 - No domain-wide delegation.
 - No impersonation: there is no `as` parameter anywhere, and no credential type
   that could express one.
-- No user-content APIs: Gmail, Drive, Docs, Sheets, Slides, Calendar, Chat, Meet,
-  Keep, Tasks, Forms, YouTube, Classroom, Sites and Apps Script are out of scope,
-  permanently.
+- No user-content APIs: Gmail, Drive, Docs, Sheets, Slides, the Calendar API,
+  Chat, Meet, Keep, Tasks, Forms, YouTube, Classroom, Sites and Apps Script are
+  out of scope, permanently. (Calendar *resources* — the rooms a company books —
+  are admin data and are in scope.)
 
 The supported paths for the things people use impersonation for are the audited
 ones: **Vault** for legal holds and eDiscovery, **Data Transfer** for offboarding,
@@ -59,17 +59,15 @@ without guessing.
 
 ## Authentication
 
-One credential: an **admin user OAuth client** you create in your own Google
-Cloud project, with the application type set to **Internal**. The administrator
-signs in once; the refresh token is stored locally with owner-only permissions.
+One credential: a **Desktop-app OAuth client** in your own Cloud project, with
+the consent screen set to **Internal**. The administrator signs in once; the
+refresh token is stored with owner-only permissions.
 
-- No service account, no DWD grant, no super-admin security settings to change.
-- The Internal app type gives long-lived refresh tokens without verification.
-  A client left in **Testing** publishing status expires refresh tokens after
-  seven days — the setup docs call this out because it silently breaks an
-  unattended admin tool.
-- Scopes are admin-only. Nothing in the requested scope list grants mailbox or
-  file content of another user.
+- No service account, no DWD grant, no key file to rotate.
+- Internal keeps refresh tokens long-lived. A client left in **Testing** expires
+  them after seven days; [`docs/SETUP.md`](docs/SETUP.md#the-seven-day-trap)
+  explains the fix.
+- Scopes are admin-only. Nothing requested grants another user's mail or files.
 
 ## Safety model
 
@@ -86,33 +84,65 @@ signs in once; the refresh token is stored locally with owner-only permissions.
 ## Install
 
 ```bash
-npm install -g google-workspace-admin-mcp
 export GWS_CLIENT_ID=...        # Desktop-app OAuth client, Internal consent screen
 export GWS_CLIENT_SECRET=...
-google-workspace-admin-mcp auth
+npx google-workspace-admin-mcp@latest auth
 ```
 
-`npx google-workspace-admin-mcp` works the same way once the package is
-published. The full walkthrough — enabling the six APIs, the consent screen, the
-admin roles per surface, the seven-day refresh-token trap — is in
-[`docs/SETUP.md`](docs/SETUP.md).
+Authorization prints a URL, waits for the loopback callback and stores the
+refresh token. Then add the server to your client:
 
-The server starts read-only. Set `GWS_MODE=write` to register mutating tools, and
-`GWS_PASSTHROUGH=on` for the allowlisted raw-call tools.
+```json
+{
+  "mcpServers": {
+    "gwa": {
+      "command": "npx",
+      "args": ["-y", "google-workspace-admin-mcp@latest"],
+      "env": {
+        "GWS_CLIENT_ID": "…",
+        "GWS_CLIENT_SECRET": "…"
+      }
+    }
+  }
+}
+```
+
+That block is the shape Claude Desktop and Claude Code use; OpenCode puts the
+same command under `mcp.servers` in its config. A client you launch from a shell
+that already exports the two variables needs no `env` block at all.
+
+The server starts **read-only**: mutating tools are absent, not merely refused.
+Set `GWS_MODE=write` to register them, and `GWS_PASSTHROUGH=on` for the
+allowlisted raw-call tools.
+
+The full walkthrough — six APIs, consent screen, admin roles per surface,
+editions, the seven-day trap — is in [`docs/SETUP.md`](docs/SETUP.md).
+
+## What to ask it
+
+- "Find jane@, list her recent logins, her OAuth grants and her devices." →
+  directory and audit tools, read-only.
+- "Who changed group membership in the last week?" → flattened audit events.
+- "Offboard jane@: revoke app grants, sign out sessions, list devices, then
+  suspend." → the destructive calls each ask for confirmation; run it in write
+  mode.
+- "Which licence seats are unused?" → licence list plus user last-login data.
+- "Can this tenant use Vault?" → `gws_auth_status` reports the edition it probed
+  and the source of that answer.
 
 ## Development
 
 ```bash
 npm install
-npm run check   # typecheck + lint + generated docs + tests
+npm run check   # typecheck, lint, scope check, tests
 ```
 
 `npm run docs:scopes` regenerates the scope list in `docs/SETUP.md` from
 `ADMIN_SCOPES`; `npm run check` fails when the two disagree.
 
-Specs live in `openspec/changes/workspace-admin-mcp/`. Each capability spec is
-linked from its tracking issue. OpenSpec is used for planning only; tests are the
-enforcement mechanism.
+Specs live in `openspec/specs/`, one per capability; the archived change that
+produced them is under `openspec/changes/archive/`. OpenSpec is used for
+planning only; tests are the enforcement mechanism.
 
 No live Workspace tenant is needed to contribute. Verification tiers, tenant
 access levels, the redaction rules for smoke output and the smoke commands are in
@@ -131,10 +161,8 @@ Publishing runs from GitHub Actions, never from a laptop:
   `<version>-beta.<run_number>` to the `beta` dist-tag, so a branch is
   installable before it merges. `v*-beta*` tags and manual runs do the same.
 
-The name is claimed and the trusted publisher is configured for this
-repository and `ci.yml`.
-
-No `NPM_TOKEN` secret is used: npm validates the workflow's OIDC identity.
+No `NPM_TOKEN` secret is used: npm validates the workflow's OIDC identity
+(trusted publisher bound to this repository and `ci.yml`).
 
 ## License
 
