@@ -30,6 +30,14 @@
     "https://www.googleapis.com/auth/admin.directory.userschema.readonly",
     "https://www.googleapis.com/auth/cloud-platform"
   ],
+  "reports": [
+    "https://www.googleapis.com/auth/admin.reports.audit.readonly",
+    "https://www.googleapis.com/auth/admin.reports.usage.readonly"
+  ],
+  "datatransfer": [
+    "https://www.googleapis.com/auth/admin.datatransfer",
+    "https://www.googleapis.com/auth/admin.datatransfer.readonly"
+  ],
   "alertcenter": ["https://www.googleapis.com/auth/apps.alerts"],
   "cloudsearch": [
     "https://www.googleapis.com/auth/cloud_search",

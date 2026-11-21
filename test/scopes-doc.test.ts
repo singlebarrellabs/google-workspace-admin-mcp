@@ -35,8 +35,10 @@ describe("requested scopes against the published API documents", () => {
       "admin",
       "alertcenter",
       "cloudsearch",
+      "datatransfer",
       "groupssettings",
       "licensing",
+      "reports",
       "vault",
     ]);
     for (const [api, scopes] of Object.entries(snapshot)) {

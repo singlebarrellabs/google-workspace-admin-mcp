@@ -12,6 +12,8 @@ import { fileURLToPath } from "node:url";
 
 const APIS: Record<string, string> = {
   admin: "https://admin.googleapis.com/$discovery/rest?version=directory_v1",
+  reports: "https://admin.googleapis.com/$discovery/rest?version=reports_v1",
+  datatransfer: "https://admin.googleapis.com/$discovery/rest?version=datatransfer_v1",
   alertcenter: "https://alertcenter.googleapis.com/$discovery/rest?version=v1beta1",
   cloudsearch: "https://cloudsearch.googleapis.com/$discovery/rest?version=v1",
   groupssettings: "https://groupssettings.googleapis.com/$discovery/rest?version=v1",
