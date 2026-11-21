@@ -25,3 +25,382 @@ jobs:
       - run: npm test
       - run: npm run build
       - run: node dist/main.js --version
+
+  publish:
+    # NPM_PUBLISH_ENABLED stays false until the package is bootstrapped and the
+    # npm trusted publisher is configured. Remove the gate in the same change
+    # that turns it on; see the release section of docs/SETUP.md.
+    if: >-
+      (github.event_name == 'push' || github.event_name == 'workflow_dispatch') &&
+      vars.NPM_PUBLISH_ENABLED == 'true'
+    needs: test
+    runs-on: ubuntu-latest
+    concurrency:
+      group: publish
+      cancel-in-progress: false
+    permissions:
+      contents: write
+      id-token: write # trusted publishing (OIDC)
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          # Guard diffs before..sha; the `before` commit must be local.
+          fetch-depth: 0
+      - name: Determine whether the push changed shipping files
+        id: changes
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          REF_TYPE: ${{ github.ref_type }}
+          FORCED: ${{ github.event.forced }}
+          BEFORE: ${{ github.event.before }}
+          SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+
+          emit() { # $1 = true|false, $2 = log line
+            echo "changed=$1" >> "$GITHUB_OUTPUT"
+            echo "$2"
+          }
+
+          # A force push rewrites history that may already be published. `before`
+          # is unreachable, so before..sha cannot describe what shipped, and the
+          # registry still holds versions for commits that no longer exist.
+          # Publishing here could ship a superseded tree or reuse a version that
+          # belongs to history nobody can inspect, so skip: the next ordinary push
+          # diffs against a reachable `before` and publishes everything since.
+          if [ "$FORCED" = "true" ]; then
+            echo "::notice::force push: publishing skipped (the next ordinary push to this branch will publish)"
+            emit false "force push: no publish"
+            exit 0
+          fi
+
+          # A tag push (v*-beta*) is an explicit release request.
+          if [ "$REF_TYPE" = "tag" ]; then
+            emit true "tag push: publishing"
+            exit 0
+          fi
+
+          # Manual dispatch = staging beta: a human asked for it.
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            emit true "workflow_dispatch: publishing"
+            exit 0
+          fi
+
+          # Empty or all-zero `before` (new branch): nothing to diff.
+          if [ -z "$BEFORE" ] || [ "$BEFORE" = "0000000000000000000000000000000000000000" ]; then
+            emit true "no usable before commit: publishing"
+            exit 0
+          fi
+
+          # Shallow-checkout trap: fail loudly rather than skip a release.
+          if ! git cat-file -e "${BEFORE}^{commit}" 2>/dev/null; then
+            echo "::error::before commit ${BEFORE} not in checkout; actions/checkout needs fetch-depth: 0"
+            exit 1
+          fi
+
+          # Squash merges make before..sha exactly the merged PR's diff.
+          # --no-renames so a rename cannot hide a shipping source path.
+          changed_paths="$(git diff --no-renames --name-only "$BEFORE" "$SHA")"
+          echo "Paths changed by ${BEFORE}..${SHA}:"
+          printf '%s\n' "$changed_paths"
+
+          # package.json ships when any field other than version and an INERT
+          # devDependency differs. Everything that is not in package.json's
+          # `files` list (dist/, README.md, LICENSE) is non-shipping: a test or
+          # docs commit cannot change the tarball, so releasing on one only
+          # burns a version number.
+          INERT_DEVDEPS='["@biomejs/biome","@types/node","markdownlint-cli2","nock","tsx","typescript","vitest"]'
+
+          # The literal above is the list this commit publishes under. The guard
+          # compares against the copy on the base revision instead, so a PR that
+          # adds a dependency to the list cannot skip that dependency's own
+          # release — the entry has to land through review first. No literal on
+          # the base (guard newly added) means everything ships, the
+          # fail-closed direction.
+          INERT_DEVDEPS="$(git show "${BEFORE}:.github/workflows/ci.yml" 2>/dev/null \
+            | sed -n "s/^[[:space:]]*INERT_DEVDEPS='\(.*\)'[[:space:]]*$/\1/p" \
+            | head -n1 || true)"
+          [ -n "$INERT_DEVDEPS" ] || INERT_DEVDEPS='[]'
+
+          pkg_shipping_changed() {
+            local before after
+            # shellcheck disable=SC2016 # $inert is a jq variable, not shell
+            local normalise='del(.version)
+              | if has("devDependencies")
+                then .devDependencies |= with_entries(select(.key as $k | ($inert | index($k)) | not))
+                else . end
+              | if (.devDependencies // {}) == {} then del(.devDependencies) else . end'
+            before="$(git show "${BEFORE}:package.json" 2>/dev/null | jq -S --argjson inert "$INERT_DEVDEPS" "$normalise")" || return 0
+            after="$(git show "${SHA}:package.json" 2>/dev/null | jq -S --argjson inert "$INERT_DEVDEPS" "$normalise")" || return 0
+            [ "$before" != "$after" ]
+          }
+
+          publish=false
+          while IFS= read -r path; do
+            [ -z "$path" ] && continue
+            case "$path" in
+              package-lock.json|.github/*|test/*|docs/*|openspec/*|smoke/*|.smoke/*|AGENTS.md)
+                echo "  skip:    $path (not in the published package)"
+                ;;
+              package.json)
+                if pkg_shipping_changed; then
+                  echo "  PUBLISH: $path (a shipping field changed)"
+                  publish=true
+                else
+                  echo "  skip:    $path (only version/inert devDependencies changed)"
+                fi
+                ;;
+              *)
+                echo "  PUBLISH: $path"
+                publish=true
+                ;;
+            esac
+          done <<< "$changed_paths"
+
+          emit "$publish" "RESULT: changed=$publish"
+      - uses: actions/setup-node@v7
+        if: steps.changes.outputs.changed == 'true'
+        with:
+          node-version: 24
+          cache: npm
+          registry-url: https://registry.npmjs.org/
+      - run: npm ci --ignore-scripts
+        if: steps.changes.outputs.changed == 'true'
+        timeout-minutes: 2
+      - run: npm run build
+        if: steps.changes.outputs.changed == 'true'
+        timeout-minutes: 2
+      - name: Determine channel (latest / beta)
+        if: steps.changes.outputs.changed == 'true'
+        id: channel
+        run: |
+          if [[ "${{ github.ref_type }}" == "tag" ]]; then
+            echo "tag=beta" >> "$GITHUB_OUTPUT"
+          elif [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            # manual staging: next -beta.X after the last published beta
+            CUR=$(npm pkg get version | tr -d '"')
+            LAST_BETA=$(npm view google-workspace-admin-mcp@beta version --prefer-online 2>/dev/null || true)
+            if [ -n "$LAST_BETA" ]; then
+              LAST_BASE="${LAST_BETA%-beta.*}"
+              NEXT_BASE=$(printf '%s\n' "$CUR" "$LAST_BASE" | sort -V | tail -1)
+              if [ "$NEXT_BASE" = "$LAST_BASE" ] && [ "$NEXT_BASE" != "$CUR" ]; then
+                N="${LAST_BETA##*-beta.}"
+                npm version "${NEXT_BASE}-beta.$((N + 1))" --no-git-tag-version --no-commit-hooks
+              else
+                npm version prerelease --preid=beta --no-git-tag-version --no-commit-hooks
+              fi
+            else
+              npm version prerelease --preid=beta --no-git-tag-version --no-commit-hooks
+            fi
+            echo "tag=beta" >> "$GITHUB_OUTPUT"
+          else
+            # merge to main -> next patch after the last published `latest`
+            # --prefer-online: the registry metadata cache can hold a `latest`
+            # that moved seconds ago, and this value decides the version.
+            LAST=$(npm view google-workspace-admin-mcp@latest version --prefer-online 2>/dev/null || true)
+            CUR=$(npm pkg get version | tr -d '"')
+            if [ -n "$LAST" ] && [ "$(printf '%s\n%s' "$CUR" "$LAST" | sort -V | tail -1)" = "$LAST" ]; then
+              # tree at/below registry -> align to registry (unless equal),
+              # then bump patch; npm errors on "Version not changed" if the
+              # align target equals the current version
+              if [ "$CUR" != "$LAST" ]; then
+                npm version "$LAST" --no-git-tag-version --no-commit-hooks
+              fi
+              npm version patch --no-git-tag-version --no-commit-hooks
+            else
+              # tree version ahead (intentional minor/major bump) -> as-is
+              :
+            fi
+            echo "tag=latest" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Show publishing target
+        if: steps.changes.outputs.changed == 'true'
+        run: 'echo "Publishing $(npm pkg get version) to tag ${{ steps.channel.outputs.tag }}"'
+      - name: Publish (retry version conflicts and transient failures)
+        if: steps.changes.outputs.changed == 'true'
+        timeout-minutes: 10
+        run: |
+          set -uo pipefail
+
+          # Two pushes to main can land close enough that both compute the same
+          # next version from the registry: one publishes, the other gets
+          # E409 "cannot publish over". That is not fatal, because versions may
+          # not repeat but the tree still has to ship — bump past whatever was
+          # published and try again. Re-read the registry with --prefer-online,
+          # otherwise npm's metadata cache can hand back the same stale `latest`
+          # and the retry collides again.
+          bump_past_latest() {
+            local latest cur base
+            latest="$(npm view google-workspace-admin-mcp@latest version --prefer-online 2>/dev/null || true)"
+            [ -z "$latest" ] && return 0
+            cur="$(npm pkg get version | tr -d '"')"
+            # Never move backwards: an intentional minor/major bump in the tree
+            # must survive a conflict on some older patch version.
+            base="$latest"
+            if [ "$(printf '%s\n%s\n' "$cur" "$latest" | sort -V | tail -1)" = "$cur" ]; then
+              base="$cur"
+            fi
+            if [ "$cur" != "$base" ]; then
+              npm version "$base" --no-git-tag-version --no-commit-hooks >/dev/null 2>&1 || true
+            fi
+            npm version patch --no-git-tag-version --no-commit-hooks >/dev/null
+          }
+
+          version_exists() {
+            npm view "google-workspace-admin-mcp@$1" version --prefer-online >/dev/null 2>&1
+          }
+
+          version_githead() {
+            npm view "google-workspace-admin-mcp@$1" gitHead --prefer-online 2>/dev/null || true
+          }
+
+          tag="${{ steps.channel.outputs.tag }}"
+
+          # Re-running a publish for a commit that is already `latest` should be
+          # a no-op, not a second release of the same tree.
+          if [ "$tag" = "latest" ]; then
+            head="$(npm view google-workspace-admin-mcp@latest gitHead --prefer-online 2>/dev/null || true)"
+            if [ -n "$head" ] && [ "$head" = "$GITHUB_SHA" ]; then
+              echo "Already published as $(npm pkg get version) ($GITHUB_SHA); nothing to do."
+              exit 0
+            fi
+          fi
+
+          for i in $(seq 1 5); do
+            echo "Attempt $i with $(npm pkg get version) on tag $tag"
+            if OUT=$(npm publish --tag "$tag" --provenance --access public 2>&1); then
+              echo "$OUT"
+              exit 0
+            fi
+
+            if echo "$OUT" | grep -qE "cannot publish over|previously published|E409"; then
+              echo "$OUT" >&2
+              attempted="$(npm pkg get version | tr -d '"')"
+              # A conflict on the version this job just tried can be its own
+              # staged publish still landing, not another tree's. Let the
+              # registry settle before deciding to bump.
+              landed=false
+              for _ in $(seq 1 6); do
+                if version_exists "$attempted"; then landed=true; break; fi
+                sleep 5
+              done
+              if [ "$landed" = true ] && [ "$(version_githead "$attempted")" = "$GITHUB_SHA" ]; then
+                # The version exists, but a staged attempt may never have
+                # finalized the dist-tag. Point the tag at it before reporting
+                # success, otherwise the tag/release steps below publish a
+                # GitHub release for a version npm `latest` does not resolve to.
+                current="$(npm view "google-workspace-admin-mcp@$tag" version --prefer-online 2>/dev/null || true)"
+                if [ "$current" != "$attempted" ]; then
+                  # Trusted publishing (OIDC) may not be allowed to move a tag;
+                  # if it cannot, fail loudly instead of claiming a release that
+                  # npm `latest` does not resolve to.
+                  if ! npm dist-tag add "google-workspace-admin-mcp@$attempted" "$tag"; then
+                    echo "::error::published $attempted but could not point $tag at it; run: npm dist-tag add google-workspace-admin-mcp@$attempted $tag" >&2
+                    exit 1
+                  fi
+                fi
+                echo "Publish landed as $attempted; $tag now points at it."
+                exit 0
+              fi
+              bump_past_latest
+              echo "Version $attempted belongs to another tree; retrying as $(npm pkg get version)"
+              sleep $((i * 2))
+              continue
+            fi
+
+            echo "$OUT"
+            echo "Publish failed (transient?), retrying ($i/5)..."
+            sleep 3
+          done
+          echo "::error::could not publish after 5 attempts"
+          exit 1
+      - name: Push tag (stable only)
+        id: tag
+        if: steps.changes.outputs.changed == 'true' && steps.channel.outputs.tag == 'latest'
+        run: |
+          V=$(npm pkg get version | tr -d '"')
+          echo "published=$V" >> "$GITHUB_OUTPUT"
+          git tag "v$V"
+          git push origin "v$V"
+      - uses: softprops/action-gh-release@v3
+        if: steps.changes.outputs.changed == 'true' && steps.channel.outputs.tag == 'latest'
+        with:
+          tag_name: v${{ steps.tag.outputs.published }}
+          generate_release_notes: true
+      - uses: softprops/action-gh-release@v3
+        if: steps.changes.outputs.changed == 'true' && github.ref_type == 'tag'
+        with:
+          tag_name: ${{ github.ref_name }}
+          generate_release_notes: true
+          prerelease: true
+
+  # Per-PR beta prerelease: every PR push publishes a unique <version>-beta.<run_number>
+  # to the npm `beta` dist-tag, so every PR is instantly installable
+  # (`npm i google-workspace-admin-mcp@beta`). run_number increases per workflow run, so
+  # each push gets a unique version; re-runs collide with themselves and are
+  # deduped (conflict = exit 0). Same-repo, non-draft, non-dependabot PRs only.
+  #
+  # `beta` is a preview channel, not a snapshot of main: it points at whichever
+  # branch build ran last. Stable installs use `latest`.
+  prerelease:
+    runs-on: ubuntu-latest
+    needs: test
+    if: >-
+      github.event_name == 'pull_request' &&
+      github.event.pull_request.draft == false &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.actor != 'dependabot[bot]' &&
+      vars.NPM_PUBLISH_ENABLED == 'true'
+    concurrency:
+      group: pr-prerelease-${{ github.ref }}
+      cancel-in-progress: true
+    permissions:
+      contents: read
+      id-token: write # trusted publishing (OIDC)
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+          registry-url: https://registry.npmjs.org/
+      - run: npm ci --ignore-scripts
+      - run: npm run build
+      - name: Compute prerelease version
+        id: version
+        run: |
+          BASE=$(npm pkg get version | tr -d '"')
+          echo "version=${BASE}-beta.${{ github.run_number }}" >> "$GITHUB_OUTPUT"
+      - name: Set version (no git change)
+        run: npm version "${{ steps.version.outputs.version }}" --no-git-tag-version --no-commit-hooks
+      - name: Publish beta prerelease
+        timeout-minutes: 5
+        run: |
+          for i in $(seq 1 3); do
+            OUT=$(npm publish --tag beta --provenance --access public 2>&1) && { echo "$OUT"; exit 0; }
+            if echo "$OUT" | grep -qE "cannot publish over|previously published"; then
+              echo "$OUT" >&2
+              echo "Version conflict (workflow re-run) — deduped" >&2
+              exit 0
+            fi
+            echo "$OUT"
+            echo "Publish failed (transient?), retrying ($i/3)..."
+            sleep 3
+          done
+          exit 1
+      - name: Comment version on PR
+        uses: actions/github-script@v9
+        with:
+          script: |
+            const body = `Beta prerelease published: \`${{ steps.version.outputs.version }}\` — installable with \`npm i google-workspace-admin-mcp@beta\`.`;
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner, repo: context.repo.repo, issue_number: context.issue.number
+            });
+            const marker = comments.find(c => c.user.login === 'github-actions[bot]' && c.body.startsWith('Beta prerelease published:'));
+            if (marker) {
+              await github.rest.issues.updateComment({ owner: context.repo.owner, repo: context.repo.repo, comment_id: marker.id, body });
+            } else {
+              await github.rest.issues.createComment({ owner: context.repo.owner, repo: context.repo.repo, issue_number: context.issue.number, body });
+            }
