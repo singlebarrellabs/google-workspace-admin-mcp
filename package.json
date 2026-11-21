@@ -26,6 +26,7 @@
     "docs:scopes": "tsx scripts/generate-scopes.ts",
     "docs:scopes:check": "tsx scripts/generate-scopes.ts --check",
     "docs:tools": "tsx scripts/generate-tools.ts",
+    "api:scopes": "tsx scripts/api-verify.ts",
     "smoke:status": "tsx scripts/smoke.ts --status",
     "smoke:read": "tsx scripts/smoke.ts --auto",
     "smoke:auto": "tsx scripts/smoke.ts --auto",
