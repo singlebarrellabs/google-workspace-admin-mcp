@@ -16,7 +16,7 @@ const addressShape = z.object({
   locality: z.string().optional().describe("City or town"),
   administrativeArea: z.string().optional().describe("State or region"),
   postalCode: z.string().optional(),
-  regionCode: z.string().min(2).max(2).optional().describe("CLDR country code, for example US"),
+  regionCode: z.string().length(2).describe("Required CLDR country code, for example US"),
   languageCode: z.string().optional().describe("BCP-47 language of the address"),
   sublocality: z.string().optional(),
 });
