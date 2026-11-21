@@ -19,7 +19,6 @@ export const ADMIN_SCOPES = [
   "https://www.googleapis.com/auth/admin.reports.usage.readonly",
   "https://www.googleapis.com/auth/admin.datatransfer",
   // Alert Center is not a surface: Google requires a service account with
-  // domain-wide delegation, so apps.alerts can never be granted to this server.
   // domain-wide delegation, so apps.alerts can never be granted here.
   "https://www.googleapis.com/auth/apps.licensing",
   "https://www.googleapis.com/auth/ediscovery",
