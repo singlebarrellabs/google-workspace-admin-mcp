@@ -131,6 +131,50 @@ describe("matters", () => {
     expect(error.nextStep).toContain("directory");
   });
 
+  it("reads Google's 'not installed' answer as an edition problem", async () => {
+    nock("https://vault.googleapis.com")
+      .get("/v1/matters")
+      .query(true)
+      .reply(403, {
+        error: {
+          code: 403,
+          message: "Customer does not have Vault installed.",
+          errors: [{ reason: "forbidden" }],
+        },
+      });
+
+    const error = failure(
+      await service()
+        .listMatters({})
+        .catch((caught) => caught),
+    );
+
+    expect(error.category).toBe("edition_unavailable");
+    expect(error.nextStep).toContain("directory or reports");
+  });
+
+  it("keeps a missing privilege as permission_denied and quotes Google", async () => {
+    nock("https://vault.googleapis.com")
+      .get("/v1/matters/m1")
+      .query(true)
+      .reply(403, {
+        error: {
+          code: 403,
+          message: "The caller does not have permission",
+          errors: [{ reason: "forbidden" }],
+        },
+      });
+
+    const error = failure(
+      await service()
+        .getMatter("m1")
+        .catch((caught) => caught),
+    );
+
+    expect(error.category).toBe("permission_denied");
+    expect(error.message).toContain("Google said: The caller does not have permission");
+  });
+
   it("creates a matter with a requested region", async () => {
     const scope = nock("https://vault.googleapis.com")
       .post("/v1/matters", { name: "Case 2026-015", matterRegion: "US" })

@@ -657,36 +657,30 @@ export class VaultService {
 function mapVaultError(error: unknown, matterId?: string): ToolError {
   if (error instanceof ToolError) return error;
 
-  const status = statusOf(error);
+  const mapped = mapGoogleError(error, "vault");
   const detail = messageOf(error);
 
-  if (status === 403 && !looksLikeEdition(error, detail)) {
+  if (mapped.category === "edition_unavailable") {
+    return new ToolError(
+      "edition_unavailable",
+      "Vault requires Google Workspace Enterprise or Education, and this tenant does not have it.",
+      "Use the directory or reports tools for the same task; Vault is only available on Enterprise or Education.",
+    );
+  }
+
+  if (mapped.category === "permission_denied") {
     return new ToolError(
       "permission_denied",
       `${
         matterId ? `Matter ${matterId} is not visible to the signed-in administrator. ` : ""
-      }Vault access depends on the matter being shared with the administrator, or on the View All Matters privilege.`,
-      "Ask a Vault administrator to share the matter with this account, or grant the View All Matters privilege.",
+      }Vault access depends on the matter being shared with the administrator, or on the View All Matters privilege.${
+        detail ? ` Google said: ${detail}.` : ""
+      }`,
+      "Ask a Vault administrator to share the matter, or grant the View All Matters privilege.",
     );
   }
 
-  const mapped = mapGoogleError(error, "vault");
-  if (mapped.category === "edition_unavailable") {
-    return new ToolError(
-      "edition_unavailable",
-      "Vault requires Google Workspace Enterprise or Education. This tenant does not have it.",
-      "Use the directory, reports or alert tools for the same task; Vault is only available on Enterprise or Education.",
-    );
-  }
   return mapped;
-}
-
-function looksLikeEdition(error: unknown, detail: string): boolean {
-  const reasons = reasonsOf(error);
-  return (
-    reasons.includes("accessNotConfigured") ||
-    /edition|entitlement|not (?:available|enabled) for your|requires google workspace/i.test(detail)
-  );
 }
 
 function statusOf(error: unknown): number | undefined {

@@ -71,15 +71,31 @@ export function mapGoogleError(error: unknown, surface?: string): ToolError {
   const why = reasons(err);
   const detail = err.message ?? "";
 
-  const entitlement =
-    why.some((r) => r === "accessNotConfigured" || r === "forbidden") &&
-    Boolean(surface && ENTERPRISE_SURFACES.has(surface));
+  const enterpriseSurface = Boolean(surface && ENTERPRISE_SURFACES.has(surface));
 
-  if (entitlement || (status === 403 && isEditionText(detail))) {
+  // Entitlement is judged on the message: Vault answers a tenant without it
+  // with "Customer does not have Vault installed", and a missing privilege with
+  // a permission message. The reason code is "forbidden" for both.
+  const entitlement = enterpriseSurface && status === 403 && isEditionText(detail);
+
+  if (entitlement) {
     return new ToolError(
       "edition_unavailable",
       `${surface} requires Google Workspace Enterprise or Education. This tenant does not have it.`,
-      "Use the Vault or Cloud Search tools only on an Enterprise or Education tenant; see docs/SETUP.md.",
+      surface === "vault"
+        ? "Use the directory or reports tools for the same task; Vault is only on Enterprise or Education."
+        : "Use the Cloud Search tools only on an Enterprise or Education tenant; see docs/SETUP.md.",
+    );
+  }
+
+  // A disabled API is a project setting, not an edition problem. The edition
+  // probe asks for this reason first so it reports "unknown" rather than
+  // "not enterprise".
+  if (why.includes("accessNotConfigured")) {
+    return new ToolError(
+      "invalid_request",
+      `The ${surface} API is not enabled in this Cloud project: ${detail || "accessNotConfigured"}.`,
+      "Enable the API in the Google Cloud console, then retry.",
     );
   }
 
@@ -111,5 +127,7 @@ export function mapGoogleError(error: unknown, surface?: string): ToolError {
 }
 
 function isEditionText(text: string): boolean {
-  return /edition|entitlement|not available for your|requires google workspace/i.test(text);
+  return /edition|entitlement|not available|requires google workspace|not installed|does not have .*installed|must be enabled|is not enabled for/i.test(
+    text,
+  );
 }
