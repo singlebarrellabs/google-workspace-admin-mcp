@@ -3,9 +3,19 @@ name: CI
 on:
   push:
     branches: [main]
+    tags: ["v*-beta*"]
   # Every pull request, whatever its base: a stacked PR targets the branch
   # below it, and filtering on main silently left those without a run.
+  # ready_for_review is listed because a draft PR skips the prerelease job.
   pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  merge_group:
+  workflow_dispatch:
+
+# Read-only GITHUB_TOKEN for every job that does not say otherwise. Publish and
+# prerelease declare their own blocks, which replace this one.
+permissions:
+  contents: read
 
 jobs:
   test:
@@ -27,12 +37,7 @@ jobs:
       - run: node dist/main.js --version
 
   publish:
-    # NPM_PUBLISH_ENABLED stays false until the package is bootstrapped and the
-    # npm trusted publisher is configured. Remove the gate in the same change
-    # that turns it on; see the release section of docs/SETUP.md.
-    if: >-
-      (github.event_name == 'push' || github.event_name == 'workflow_dispatch') &&
-      vars.NPM_PUBLISH_ENABLED == 'true'
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     needs: test
     runs-on: ubuntu-latest
     concurrency:
@@ -350,8 +355,7 @@ jobs:
       github.event_name == 'pull_request' &&
       github.event.pull_request.draft == false &&
       github.event.pull_request.head.repo.full_name == github.repository &&
-      github.actor != 'dependabot[bot]' &&
-      vars.NPM_PUBLISH_ENABLED == 'true'
+      github.actor != 'dependabot[bot]'
     concurrency:
       group: pr-prerelease-${{ github.ref }}
       cancel-in-progress: true

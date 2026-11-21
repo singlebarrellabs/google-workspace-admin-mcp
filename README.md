@@ -131,17 +131,10 @@ Publishing runs from GitHub Actions, never from a laptop:
   `<version>-beta.<run_number>` to the `beta` dist-tag, so a branch is
   installable before it merges. `v*-beta*` tags and manual runs do the same.
 
-The first release needs two one-time steps:
+The name is claimed and the trusted publisher is configured for this
+repository and `ci.yml`.
 
-1. Claim the name: `npm publish --access public` once from a checkout, signed in
-   with an account that can publish `@singlebarrellabs` packages.
-2. Configure the trusted publisher at
-   `npmjs.com/package/google-workspace-admin-mcp/access` with repository
-   `singlebarrellabs/google-workspace-admin-mcp` and workflow `ci.yml`.
-
-Until then, both publishing jobs are gated by the repository variable
-`NPM_PUBLISH_ENABLED`; set it to `true` after step 2 and delete the gate. No
-`NPM_TOKEN` secret is used: npm validates the workflow's OIDC identity.
+No `NPM_TOKEN` secret is used: npm validates the workflow's OIDC identity.
 
 ## License
 
