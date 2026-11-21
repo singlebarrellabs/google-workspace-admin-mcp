@@ -3,6 +3,7 @@ import nock from "nock";
 import { afterEach, describe, expect, it } from "vitest";
 import { DevicesService } from "../src/services/devices.js";
 import { UserSecurityService } from "../src/services/user-security.js";
+import { userSecurityTools } from "../src/tools/directory/user-security.js";
 
 function auth(): OAuth2Client {
   const client = new OAuth2Client({
@@ -167,6 +168,15 @@ describe("user security", () => {
     );
 
     expect(codes).toEqual([{ userId: "1003", verificationCode: "123456789" }]);
+
+    // Both change a user's second factor, so both are destructive-class.
+    const specs = userSecurityTools(new UserSecurityService(auth())).filter((spec) =>
+      spec.name.startsWith("gws_user_verification_codes_"),
+    );
+    expect(specs.map((spec) => spec.access)).toEqual(["destructive", "destructive"]);
+    for (const spec of specs) {
+      expect("confirmNote" in spec ? spec.confirmNote : "").not.toBe("");
+    }
   });
 
   it("invalidates backup codes", async () => {

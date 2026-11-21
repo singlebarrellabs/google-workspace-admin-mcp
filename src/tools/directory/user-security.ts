@@ -61,11 +61,15 @@ export function userSecurityTools(
     {
       name: "gws_user_verification_codes_generate",
       surface: "directory",
-      access: "write",
+      access: "destructive",
       edition: "all",
       description:
-        "Generate new backup verification codes for a user, replacing any existing ones. The codes are returned because the admin hands them over; treat the result as a credential.",
-      inputShape: userKeyShape,
+        "Issue a new set of backup verification codes for a user, superseding the codes they hold. The codes are returned because the admin hands them over; treat the result as a credential.",
+      confirmNote: "the user's existing backup codes stop working and the new set is shown once",
+      inputShape: {
+        ...userKeyShape,
+        confirm: z.boolean().optional().describe("Must be true"),
+      },
       run: async (input) => {
         const args = z.object(userKeyShape).parse(input);
         const items = await service.generateVerificationCodes(args.userKey);
@@ -78,13 +82,23 @@ export function userSecurityTools(
     {
       name: "gws_user_verification_codes_invalidate",
       surface: "directory",
-      access: "write",
+      access: "destructive",
       edition: "all",
       description:
         "Invalidate a user's backup verification codes. Use after a suspected compromise, before issuing new ones.",
-      inputShape: userKeyShape,
+      confirmNote:
+        "the current codes stop working, and the user may be unable to sign in on a new device until new codes are issued",
+      inputShape: {
+        ...userKeyShape,
+        confirm: z.boolean().optional().describe("Must be true"),
+      },
       run: async (input) => {
-        const args = z.object(userKeyShape).parse(input);
+        const args = z
+          .object({
+            ...userKeyShape,
+            confirm: z.boolean().optional(),
+          })
+          .parse(input);
         await service.invalidateVerificationCodes(args.userKey);
         return {
           summary: `Verification codes invalidated for ${args.userKey}`,
