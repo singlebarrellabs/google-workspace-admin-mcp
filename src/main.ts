@@ -7,6 +7,7 @@ import { authorize, createOAuthClient } from "./auth/oauth.js";
 import { FileTokenStore } from "./auth/token-store.js";
 import { buildServer } from "./server.js";
 import { DirectoryService } from "./services/directory.js";
+import { DomainsService } from "./services/domains.js";
 import { ReportsService } from "./services/reports.js";
 
 const VERSION = "0.1.0";
@@ -37,6 +38,7 @@ async function main(): Promise<void> {
     token,
     edition: auth ? new EditionProbe(auth) : undefined,
     directory: auth ? new DirectoryService(auth) : undefined,
+    domains: auth ? new DomainsService(auth) : undefined,
     reports: auth ? new ReportsService(auth) : undefined,
   });
 

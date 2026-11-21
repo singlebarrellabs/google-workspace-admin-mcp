@@ -7,6 +7,7 @@ import type { AnyToolSpec } from "./catalog.js";
 import { AuditLog } from "./safety/audit.js";
 import { requireConfirm, toolsForMode } from "./safety/policy.js";
 import type { DirectoryService } from "./services/directory.js";
+import type { DomainsService } from "./services/domains.js";
 import type { ReportsService } from "./services/reports.js";
 import { directoryTools } from "./tools/directory.js";
 import { reportsTools } from "./tools/reports.js";
@@ -18,6 +19,7 @@ export interface ServerDeps {
   token?: StoredToken;
   edition?: EditionProbe;
   directory?: DirectoryService;
+  domains?: DomainsService;
   reports?: ReportsService;
 }
 
@@ -26,7 +28,7 @@ export function buildServer(deps: ServerDeps): { server: McpServer; tools: strin
   const audit = new AuditLog(config.auditPath);
   const specs: AnyToolSpec[] = [
     ...systemTools({ config, token, edition: deps.edition }),
-    ...(deps.directory ? directoryTools(deps.directory) : []),
+    ...(deps.directory && deps.domains ? directoryTools(deps.directory, deps.domains) : []),
     ...(deps.reports ? reportsTools(deps.reports) : []),
   ];
 

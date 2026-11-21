@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { loadConfig } from "../src/auth/config.js";
 import { buildServer } from "../src/server.js";
 import { DirectoryService } from "../src/services/directory.js";
+import { DomainsService } from "../src/services/domains.js";
 
 function deps(mode: "readonly" | "write") {
   const config = {
@@ -10,13 +11,11 @@ function deps(mode: "readonly" | "write") {
     tokenPath: "/tmp/test-token.json",
     auditPath: "/tmp/test-audit.jsonl",
   };
-  const directory = new DirectoryService(
-    new OAuth2Client({
-      clientId: "client-id.apps.googleusercontent.com",
-      clientSecret: "placeholder",
-    }),
-  );
-  return { config, directory };
+  const auth = new OAuth2Client({
+    clientId: "client-id.apps.googleusercontent.com",
+    clientSecret: "placeholder",
+  });
+  return { config, directory: new DirectoryService(auth), domains: new DomainsService(auth) };
 }
 
 describe("tool registration invariants", () => {
