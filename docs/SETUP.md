@@ -189,6 +189,7 @@ status, not message bodies.
 - `https://www.googleapis.com/auth/admin.directory.group.member`
 - `https://www.googleapis.com/auth/admin.directory.orgunit`
 - `https://www.googleapis.com/auth/admin.directory.device.mobile`
+- `https://www.googleapis.com/auth/admin.directory.device.chromeos`
 - `https://www.googleapis.com/auth/admin.directory.rolemanagement`
 - `https://www.googleapis.com/auth/admin.directory.domain`
 - `https://www.googleapis.com/auth/admin.directory.customer.readonly`
