@@ -1,5 +1,9 @@
 # safety-gates
 
+## Purpose
+
+Keeps the server read-only by default, gates destructive calls, audits every call, and turns API failures into actionable errors.
+
 ## ADDED Requirements
 
 ### Requirement: Read-only by default

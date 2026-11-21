@@ -1,5 +1,9 @@
 # admin-resources
 
+## Purpose
+
+Manages calendar resources - buildings, rooms and features - so a room can be booked.
+
 ## ADDED Requirements
 
 ### Requirement: Buildings and rooms

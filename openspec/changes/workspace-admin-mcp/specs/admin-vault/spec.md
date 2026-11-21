@@ -1,5 +1,9 @@
 # admin-vault
 
+## Purpose
+
+Supports eDiscovery - matters, holds, saved searches and exports - on tenants that have Vault.
+
 ## ADDED Requirements
 
 ### Requirement: Matter management

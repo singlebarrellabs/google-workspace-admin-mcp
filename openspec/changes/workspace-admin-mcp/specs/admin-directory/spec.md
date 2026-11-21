@@ -1,5 +1,9 @@
 # admin-directory
 
+## Purpose
+
+Manages the tenant directory: users, aliases, domains, groups, org units, roles, devices and user security.
+
 ## ADDED Requirements
 
 ### Requirement: User lifecycle

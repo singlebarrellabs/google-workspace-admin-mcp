@@ -1,5 +1,9 @@
 # admin-cloud-search
 
+## Purpose
+
+Searches the tenant's indexed content through Cloud Search, and explains an empty result as either no match or no configured data source.
+
 ## ADDED Requirements
 
 ### Requirement: Query

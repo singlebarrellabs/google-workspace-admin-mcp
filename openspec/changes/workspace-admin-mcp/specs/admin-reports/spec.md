@@ -1,5 +1,9 @@
 # admin-reports
 
+## Purpose
+
+Reports audit activity and usage, so an administrator can answer who did what and how much was used.
+
 ## ADDED Requirements
 
 ### Requirement: Audit activity queries
