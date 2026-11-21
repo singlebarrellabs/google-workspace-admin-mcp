@@ -14,7 +14,7 @@ default, and honest about which surfaces the tenant can even use.
 ## What Changes
 
 - New MCP server, `google-workspace-admin-mcp`, stdio transport, published to npm.
-- Nine admin surfaces: Directory, Reports, Alert Center, Vault, Cloud Search,
+- Eight admin surfaces: Directory, Reports, Vault, Cloud Search,
   Data Transfer, Enterprise License Manager, Groups Settings, Calendar Resources.
 - One allowlisted raw-call tool per enabled API for cases curated tools miss.
 - One credential: an admin user OAuth client owned by the operator. No service
@@ -30,7 +30,7 @@ default, and honest about which surfaces the tenant can even use.
 ## Impact
 
 - Affected specs: `credentials`, `safety-gates`, `api-passthrough`,
-  `admin-directory`, `admin-reports`, `admin-alerts`, `admin-vault`,
+  `admin-directory`, `admin-reports`, `admin-vault`,
   `admin-cloud-search`, `admin-transfer`, `admin-licensing`,
   `admin-groups-settings`, `admin-resources`, `docs-setup`.
 - Affected code: new repository; `src/`, `test/`, `docs/`.

@@ -31,14 +31,31 @@ Everything except live verification:
 
 Three runs, each a single command, each producing short output:
 
-1. `npm run auth` — first consent. Proves the Internal OAuth client, the loopback
-   callback and the token store work end to end. This is the only step that
-   cannot be simulated, because it involves Google's own consent screen.
-2. `npm run smoke:status` — prints the signed-in administrator, granted scopes,
-   refresh-token expiry and per-surface availability.
-3. `npm run smoke:<surface>` — one representative read call per surface.
+1. `google-workspace-admin-mcp auth` — first consent. Proves the OAuth client, the
+   loopback callback and the token store work end to end. This is the only step
+   that cannot be simulated, because it involves Google's own consent screen.
+2. `npm run smoke:status` — prints the signed-in tenant, granted scopes,
+   refresh-token expiry and per-surface availability. Redacted by default.
+3. `npm run smoke:read` — one representative read call per surface. A surface
+   whose tool is not in this revision is reported as skipped, not failed.
 
 The output of 2 and 3 is what gets shared, and only after redaction.
+
+## Configuration
+
+Smoke reads a gitignored `.env.smoke`; an exported variable always wins.
+
+| Variable | Purpose |
+| --- | --- |
+| `SMOKE_ALLOWED_DOMAINS` | Production domains a read run may touch, comma separated |
+| `SMOKE_TENANT_DOMAIN` | The signed-in tenant, when you would rather not discover it |
+| `SMOKE_GROUP` | A group address for the Groups Settings check |
+| `SMOKE_SANDBOX_DOMAIN` | The trial tenant used for write runs |
+| `SMOKE_WRITE` | Set to `1` for a mutating run; never set it on a schedule |
+
+The runner drives the real server over stdio, so it exercises the same tool
+registration, confirmation gate and audit log a client would. It never runs in
+CI: every entry point refuses when `CI` or a provider equivalent is set.
 
 ## Access ladder
 
@@ -87,12 +104,16 @@ hits it, which needs a schedule, not discipline.
 - `npm run smoke:auto` runs the read-only smoke for every surface, redacts the
   output, and writes `.smoke/<timestamp>/report.json` plus `summary.md`. Both are
   mode `0600` and gitignored. Non-zero exit on drift.
+- `npm run smoke:record` records the live response shape of each check into
+  `smoke/shapes/<check>.json`. Shapes are keys and types only, so they are safe to
+  commit; drift detection starts from the first recorded run.
 - Scheduling is local (`launchd` or `cron`, daily). No CI workflow ever holds a
   tenant credential — a public repo's Actions secrets are the wrong place for a
   refresh token.
-- Drift detection compares each live response against its fixture's **shape**:
-  key presence, types, nullability. Not values, so no tenant data enters the
-  comparison.
+- Drift detection compares each live response against the shape recorded under
+  `smoke/shapes/`: key presence and types, not values, so no tenant data enters
+  the comparison. A check without a recorded shape reports that, once, and is not
+  treated as drift.
 - On drift the report names the surface, the field path, and the expected versus
   observed type. A redacted sample may be attached; it is never fetched by
   default.
@@ -109,9 +130,27 @@ Guards. Each is a hard refusal, not a warning:
   `.smoke/` is not gitignored, and chmods every artifact to owner-only.
 - **Redaction** — cannot be disabled without an interactive terminal and an
   explicit flag.
-- **CI** — refuses to run at all when `CI` is set.
-- **Secret scan** — scans the rendered report for real-looking email addresses
-  and domains before writing; a hit aborts the run and writes nothing.
+- **CI** — refuses to run at all when `CI` or a provider equivalent is set.
+- **Secret scan** — scans the rendered report for real-looking email addresses,
+  the tenant domain, absolute home paths and token-shaped strings before writing;
+  a hit aborts the run and writes nothing.
+
+The guards live in `src/smoke/guards.ts` and are tested; they throw an error with
+a code (`ci_environment`, `domain_not_allowlisted`, `sandbox_missing`,
+`redaction_miss`, and so on) so a failed run says which rule stopped it.
+
+## Scheduling it
+
+No CI workflow holds a tenant credential. Schedule on the machine that already
+has the token:
+
+```cron
+0 7 * * *  cd /path/to/google-workspace-admin-mcp && . ./.env.smoke && npm run smoke:auto
+```
+
+On macOS, a `launchd` job does the same with `StartCalendarInterval`. Either way
+the run writes into `.smoke/` and leaves the exit code for the scheduler to log.
+A failed run is the signal to look at the report, not to retry in a loop.
 
 Limits, stated plainly:
 

@@ -61,12 +61,10 @@ can proceed in parallel worktrees. Issue numbers are in parentheses.
 - [ ] 5.3 Normaliser that flattens nested activity events into per-event rows
 - [ ] 5.4 Fixtures for login, admin, token and OAuth-grant events
 
-## 6. Alert Center (#6)
+## 6. Alert Center — removed
 
-- [ ] 6.1 List and get alerts with filter and page token
-- [ ] 6.2 Feedback create
-- [ ] 6.3 Delete and undelete behind confirm
-- [ ] 6.4 Fixtures including an alert with missing optional fields
+Google requires a service account with domain-wide delegation for the Alert
+Center API. Both are permanent non-goals, so the surface cannot exist.
 
 ## 7. Vault (#7)
 
