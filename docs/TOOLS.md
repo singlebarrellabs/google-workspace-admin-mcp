@@ -12,6 +12,10 @@ is a bug.
 | `gws_users_create` | directory | yes | Never sets `isAdmin`; forces a password change. |
 | `gws_users_update` | directory | yes | PATCH only; omitted fields keep their values. |
 | `gws_users_suspend` | directory | yes | Destructive; needs `confirm: true`. |
+| `gws_licenses_list` | licensing | no | Assignments by product, optionally by SKU. |
+| `gws_licenses_get` | licensing | no | One assignment. |
+| `gws_licenses_assign` | licensing | yes | Destructive; consumes a paid seat. |
+| `gws_licenses_revoke` | licensing | yes | Destructive; product access ends now. |
 | `gws_passthrough_directory` | directory | yes | Off by default; writes need write mode. |
 | `gws_passthrough_reports` | reports | no | Off unless `GWS_PASSTHROUGH=on`. |
 | `gws_passthrough_vault` | vault | no | Off unless `GWS_PASSTHROUGH=on`. |
