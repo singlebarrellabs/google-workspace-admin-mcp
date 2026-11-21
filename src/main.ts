@@ -7,6 +7,7 @@ import { authorize, createOAuthClient } from "./auth/oauth.js";
 import { FileTokenStore } from "./auth/token-store.js";
 import { passthroughTools } from "./passthrough/dispatch.js";
 import { buildServer } from "./server.js";
+import { CloudSearchService } from "./services/cloud-search.js";
 import { DevicesService } from "./services/devices.js";
 import { DirectoryService } from "./services/directory.js";
 import { GroupsService } from "./services/directory-groups.js";
@@ -46,6 +47,7 @@ async function main(): Promise<void> {
   const { server } = buildServer({
     config,
     token,
+    cloudSearch: auth ? new CloudSearchService(auth) : undefined,
     transfer: auth ? new TransferService(auth) : undefined,
     resources: auth ? new ResourcesService(auth) : undefined,
     groupSettings: auth ? new GroupSettingsService(auth) : undefined,

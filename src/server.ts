@@ -6,11 +6,13 @@ import type { StoredToken } from "./auth/token-store.js";
 import type { AnyToolSpec } from "./catalog.js";
 import { AuditLog } from "./safety/audit.js";
 import { requireConfirm, toolsForMode } from "./safety/policy.js";
+import type { CloudSearchService } from "./services/cloud-search.js";
 import type { GroupSettingsService } from "./services/group-settings.js";
 import type { LicensingService } from "./services/licensing.js";
 import type { ReportsService } from "./services/reports.js";
 import type { ResourcesService } from "./services/resources.js";
 import type { TransferService } from "./services/transfer.js";
+import { cloudSearchTools } from "./tools/cloud-search.js";
 import type { DirectoryServices } from "./tools/directory.js";
 import { directoryTools } from "./tools/directory.js";
 import { groupSettingsTools } from "./tools/group-settings.js";
@@ -24,6 +26,7 @@ import { mapGoogleError, ToolError } from "./util/errors.js";
 export interface ServerDeps {
   config: AppConfig;
   token?: StoredToken;
+  cloudSearch?: CloudSearchService;
   transfer?: TransferService;
   resources?: ResourcesService;
   groupSettings?: GroupSettingsService;
@@ -41,6 +44,7 @@ export function buildServer(deps: ServerDeps): { server: McpServer; tools: strin
   const specs: AnyToolSpec[] = [
     ...systemTools({ config, token, edition: deps.edition }),
     ...(deps.directory ? directoryTools(deps.directory) : []),
+    ...(deps.cloudSearch ? cloudSearchTools(deps.cloudSearch) : []),
     ...(deps.transfer ? transferTools(deps.transfer) : []),
     ...(deps.resources ? resourceTools(deps.resources) : []),
     ...(deps.groupSettings ? groupSettingsTools(deps.groupSettings) : []),
