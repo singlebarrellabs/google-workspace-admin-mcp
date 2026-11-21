@@ -24,6 +24,7 @@ import { systemTools } from "./tools/system.js";
 import { transferTools } from "./tools/transfer.js";
 import { vaultTools } from "./tools/vault.js";
 import { mapGoogleError, ToolError } from "./util/errors.js";
+import { VERSION } from "./version.js";
 
 export interface ServerDeps {
   config: AppConfig;
@@ -58,7 +59,7 @@ export function buildServer(deps: ServerDeps): { server: McpServer; tools: strin
   ];
 
   const registered = toolsForMode(specs, config.mode);
-  const server = new McpServer({ name: "google-workspace-admin-mcp", version: "0.1.0" });
+  const server = new McpServer({ name: "google-workspace-admin-mcp", version: VERSION });
 
   for (const spec of registered) {
     server.registerTool(
