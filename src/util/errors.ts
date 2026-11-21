@@ -46,6 +46,24 @@ interface GoogleErrorShape {
 
 const ENTERPRISE_SURFACES = new Set(["vault", "cloud-search"]);
 
+/** Product names as Google writes them, for messages a human reads. */
+const SURFACE_LABELS: Record<string, string> = {
+  vault: "Google Vault",
+  "cloud-search": "Cloud Search",
+  alerts: "Alert Center",
+  directory: "the Directory API",
+  reports: "the Reports API",
+  transfer: "Data Transfer",
+  licensing: "License Manager",
+  "groups-settings": "Groups Settings",
+  resources: "Calendar Resources",
+};
+
+function label(surface?: string): string {
+  if (!surface) return "This API";
+  return SURFACE_LABELS[surface] ?? surface;
+}
+
 function reasons(err: GoogleErrorShape): string[] {
   const body = err.response?.data?.error;
   if (typeof body === "string") return [body];
@@ -81,7 +99,7 @@ export function mapGoogleError(error: unknown, surface?: string): ToolError {
   if (entitlement) {
     return new ToolError(
       "edition_unavailable",
-      `${surface} requires Google Workspace Enterprise or Education. This tenant does not have it.`,
+      `${label(surface)} requires Google Workspace Enterprise or Education. This tenant does not have it.`,
       surface === "vault"
         ? "Use the directory or reports tools for the same task; Vault is only on Enterprise or Education."
         : "Use the Cloud Search tools only on an Enterprise or Education tenant; see docs/SETUP.md.",
@@ -94,7 +112,7 @@ export function mapGoogleError(error: unknown, surface?: string): ToolError {
   if (why.includes("accessNotConfigured")) {
     return new ToolError(
       "invalid_request",
-      `The ${surface} API is not enabled in this Cloud project: ${detail || "accessNotConfigured"}.`,
+      `${label(surface)} is not enabled in this Cloud project: ${detail || "accessNotConfigured"}.`,
       "Enable the API in the Google Cloud console, then retry.",
     );
   }

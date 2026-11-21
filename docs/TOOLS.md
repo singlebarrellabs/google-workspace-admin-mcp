@@ -107,7 +107,7 @@ appends a placeholder row for anything new; the notes still need a human.
 | `gws_devices_mobile_action` | directory | yes | Destructive; wipes cannot be undone. |
 | `gws_devices_chromeos_list` | directory | no | ChromeOS fleet with serial and org unit. |
 | `gws_devices_chromeos_get` | directory | no | One ChromeOS device. |
-| `gws_devices_chromeos_action` | directory | yes | Destructive; deprovision leaves management. |
+| `gws_devices_chromeos_action` | directory | yes | Destructive; deprovision needs a reason. |
 | `gws_user_tokens_list` | directory | no | Third-party app grants and their scopes. |
 | `gws_user_tokens_delete` | directory | yes | Destructive; the app must re-consent. |
 | `gws_user_verification_codes_generate` | directory | yes | Destructive; supersedes the old set. |

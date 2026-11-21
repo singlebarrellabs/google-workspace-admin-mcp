@@ -29,6 +29,12 @@ export const SMOKE_CHECKS: SmokeCheck[] = [
     args: { maxResults: 1 },
   },
   {
+    id: "directory-chromeos",
+    surface: "directory",
+    tool: "gws_devices_chromeos_list",
+    args: { maxResults: 1 },
+  },
+  {
     id: "directory-domains",
     surface: "directory",
     tool: "gws_domains_list",
