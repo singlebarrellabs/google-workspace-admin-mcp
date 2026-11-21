@@ -138,7 +138,7 @@ describe("license assignments", () => {
     const scope = nock("https://licensing.googleapis.com")
       .delete(`${skuBase}/user/user-1%40example.com`)
       .query(true)
-      .reply(200, { userId: "user-1@example.com", skuId: "Google-Apps-For-Business" });
+      .reply(200, {});
 
     const assignment = await service().revoke({
       productId: "Google-Apps",
@@ -147,6 +147,10 @@ describe("license assignments", () => {
     });
 
     expect(scope.isDone()).toBe(true);
-    expect(assignment.userId).toBe("user-1@example.com");
+    expect(assignment).toEqual({
+      userId: "user-1@example.com",
+      productId: "Google-Apps",
+      skuId: "Google-Apps-For-Business",
+    });
   });
 });

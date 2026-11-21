@@ -102,10 +102,15 @@ export class LicensingService {
     }
   }
 
+  /** The delete answers with Empty, so the removed assignment is named from the request. */
   async revoke(args: AssignmentKey): Promise<LicenseRow> {
     try {
-      const response = await this.client.licenseAssignments.delete(args);
-      return toLicenseRow(response.data);
+      await this.client.licenseAssignments.delete(args);
+      return {
+        userId: args.userId,
+        productId: args.productId,
+        skuId: args.skuId,
+      };
     } catch (error) {
       throw mapGoogleError(error, "licensing");
     }
