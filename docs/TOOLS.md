@@ -5,7 +5,7 @@ is a bug.
 
 | Tool | Surface | Mutating | Notes |
 | --- | --- | --- | --- |
-| `gws_auth_status` | system | no | Credential state, token expiry, mode, scopes. |
+| `gws_auth_status` | system | no | Credential state, token expiry, mode, scopes, edition. |
 | `gws_scopes_list` | system | no | The admin-only scopes this server requests. |
 | `gws_users_list` | directory | no | Pages users; org unit becomes a query clause. |
 | `gws_users_get` | directory | no | One user with org unit, suspension and login state. |
@@ -55,6 +55,10 @@ is a bug.
 | `gws_user_verification_codes_generate` | directory | yes | Destructive; supersedes the old set. |
 | `gws_user_verification_codes_invalidate` | directory | yes | Destructive; may lock the user out. |
 | `gws_user_sign_out` | directory | yes | Destructive; every session ends. |
+| `gws_activities_list` | reports | no | Flat event rows; 7-day default range; 500-row cap. |
+| `gws_usage_customer_get` | reports | no | Customer usage for one date; empty is not an error. |
+| `gws_usage_user_get` | reports | no | Per-user usage with filters and org unit scope. |
+| `gws_usage_entity_get` | reports | no | Entity usage for one type and key. |
 
 ## Conventions
 

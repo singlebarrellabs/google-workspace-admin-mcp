@@ -5,9 +5,11 @@ import type { OrgUnitsService } from "../../services/orgunits.js";
 const listShape = {
   orgUnitPath: z.string().optional().describe("Start point, default the root"),
   type: z
-    .enum(["all", "children", "self"])
+    .enum(["all", "children", "allIncludingParent"])
     .optional()
-    .describe("all includes descendants, children is one level, self is the unit itself"),
+    .describe(
+      "all is the whole subtree, children is one level, allIncludingParent includes ancestors",
+    ),
 };
 
 const pathShape = {
