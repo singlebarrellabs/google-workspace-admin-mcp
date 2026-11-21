@@ -7,6 +7,10 @@ tenant, not the ones that read a user's mail.
 > [`docs/TOOLS.md`](docs/TOOLS.md) lists every tool; [`docs/SETUP.md`](docs/SETUP.md)
 > takes you from a clean Cloud project to a working server.
 
+Looking for Gmail, Drive, Calendar or Meet? Those are user content, and they live
+in the companion server, [`google-services-mcp`](https://github.com/singlebarrellabs/google-services-mcp).
+This one is the admin plane, and deliberately cannot read them.
+
 ## Why
 
 Google now ships hosted MCP servers for user surfaces — Gmail, Drive, Calendar.
@@ -166,5 +170,6 @@ No `NPM_TOKEN` secret is used: npm validates the workflow's OIDC identity
 
 ## License
 
-MIT. Part of the Single Barrel Labs MCP family — `google-services-mcp` covers the
-user plane, this covers the admin plane.
+MIT. Part of the Single Barrel Labs MCP family:
+[`google-services-mcp`](https://github.com/singlebarrellabs/google-services-mcp)
+covers the user plane, this covers the admin plane.
