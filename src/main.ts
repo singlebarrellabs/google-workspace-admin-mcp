@@ -2,6 +2,7 @@
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import type { OAuth2Client } from "google-auth-library";
 import { loadConfig } from "./auth/config.js";
+import { EditionProbe } from "./auth/edition.js";
 import { authorize, createOAuthClient } from "./auth/oauth.js";
 import { FileTokenStore } from "./auth/token-store.js";
 import { buildServer } from "./server.js";
@@ -9,6 +10,7 @@ import { DirectoryService } from "./services/directory.js";
 import { GroupsService } from "./services/directory-groups.js";
 import { DomainsService } from "./services/domains.js";
 import { OrgUnitsService } from "./services/orgunits.js";
+import { ReportsService } from "./services/reports.js";
 
 const VERSION = "0.1.0";
 
@@ -44,6 +46,8 @@ async function main(): Promise<void> {
           orgUnits: new OrgUnitsService(auth),
         }
       : undefined,
+    edition: auth ? new EditionProbe(auth) : undefined,
+    reports: auth ? new ReportsService(auth) : undefined,
   });
 
   await server.connect(new StdioServerTransport());
