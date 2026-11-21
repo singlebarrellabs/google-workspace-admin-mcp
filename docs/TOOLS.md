@@ -16,7 +16,7 @@ is a bug.
 | `gws_buildings_delete` | resources | yes | Destructive; rooms lose their building. |
 | `gws_rooms_list` | resources | no | Rooms, filterable by building; features included. |
 | `gws_rooms_get` | resources | no | One room with calendar address and capacity. |
-| `gws_rooms_create` | resources | yes | Google issues the calendar address. |
+| `gws_rooms_create` | resources | yes | Caller supplies resourceId; Google issues the email. |
 | `gws_rooms_update` | resources | yes | PATCH; other fields keep their values. |
 | `gws_rooms_delete` | resources | yes | Destructive; reports features removed with it. |
 | `gws_features_list` | resources | no | Room features. |
