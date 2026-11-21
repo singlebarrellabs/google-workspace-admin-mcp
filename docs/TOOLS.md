@@ -53,7 +53,7 @@ is a bug.
 | `gws_user_tokens_list` | directory | no | Third-party app grants and their scopes. |
 | `gws_user_tokens_delete` | directory | yes | Destructive; the app must re-consent. |
 | `gws_user_verification_codes_generate` | directory | yes | Destructive; supersedes the old set. |
-| `gws_user_verification_codes_invalidate` | directory | yes | Destructive; user may be locked out. |
+| `gws_user_verification_codes_invalidate` | directory | yes | Destructive; may lock the user out. |
 | `gws_user_sign_out` | directory | yes | Destructive; every session ends. |
 
 ## Conventions
