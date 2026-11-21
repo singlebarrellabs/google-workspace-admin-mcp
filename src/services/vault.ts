@@ -345,10 +345,12 @@ export class VaultService {
     }
   }
 
+  /** The API returns Empty, so the hold is read first to report what was released. */
   async deleteHold(matterId: string, holdId: string): Promise<HoldRow> {
+    const previous = await this.getHold(matterId, holdId);
     try {
-      const response = await this.client.matters.holds.delete({ matterId, holdId });
-      return toHoldRow(response.data);
+      await this.client.matters.holds.delete({ matterId, holdId });
+      return previous;
     } catch (error) {
       throw mapVaultError(error, matterId);
     }

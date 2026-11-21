@@ -104,7 +104,7 @@ export function buildQuery(input: ExportQueryInput): vault_v1.Schema$Query {
     ...(method ? { method } : {}),
     ...(input.accountEmails?.length ? { accountInfo: { emails: input.accountEmails } } : {}),
     ...(input.orgUnitId ? { orgUnitInfo: { orgUnitId: input.orgUnitId } } : {}),
-    ...(input.sharedDriveId ? { sharedDriveInfo: { sharedDriveId: input.sharedDriveId } } : {}),
+    ...(input.sharedDriveId ? { sharedDriveInfo: { sharedDriveIds: [input.sharedDriveId] } } : {}),
     ...(input.startTime ? { startTime: input.startTime } : {}),
     ...(input.endTime ? { endTime: input.endTime } : {}),
     ...(input.timeZone ? { timeZone: input.timeZone } : {}),
@@ -150,7 +150,7 @@ export interface HoldQueryInput {
   endTime?: string;
   includeRooms?: boolean;
   includeSharedDriveFiles?: boolean;
-  coveredData?: Array<"VOICE_TEXT" | "VOICE_AUDIO">;
+  coveredData?: Array<"TEXT_MESSAGES" | "VOICEMAILS" | "CALL_LOGS">;
   /** Raw CorpusQuery, for options the shortcuts do not model. */
   query?: Record<string, unknown>;
 }

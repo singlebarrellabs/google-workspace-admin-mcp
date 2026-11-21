@@ -57,13 +57,13 @@ const exportQueryShape = {
 };
 
 const holdQueryShape = {
-  terms: z.string().optional().describe("Search operators; Gmail, Groups and Calendar holds"),
+  terms: z.string().optional().describe("Search operators; Gmail and Groups holds"),
   startTime: z.string().optional().describe("Start of the range; Gmail and Groups holds"),
   endTime: z.string().optional().describe("End of the range; Gmail and Groups holds"),
   includeRooms: z.boolean().optional().describe("Include Chat spaces; Chat holds"),
   includeSharedDriveFiles: z.boolean().optional().describe("Include shared drives; Drive holds"),
   coveredData: z
-    .array(z.enum(["VOICE_TEXT", "VOICE_AUDIO"]))
+    .array(z.enum(["TEXT_MESSAGES", "VOICEMAILS", "CALL_LOGS"]))
     .optional()
     .describe("Voice data types; Voice holds require this"),
   query: z
@@ -354,7 +354,7 @@ export function vaultTools(service: VaultService): Array<ToolSpec | ConfirmedToo
       access: "write",
       edition: "enterprise",
       description:
-        "Create a hold over accounts or one organizational unit. The query options must match the corpus: terms for Gmail, Groups and Calendar, coveredData for Voice, shared drives for Drive. Enterprise or Education only.",
+        "Create a hold over accounts or one organizational unit. The query options must match the corpus: terms for Gmail and Groups, coveredData for Voice, shared drives for Drive. Enterprise or Education only.",
       inputShape: createHoldShape,
       run: async (input) => {
         const args = z.object(createHoldShape).parse(input);

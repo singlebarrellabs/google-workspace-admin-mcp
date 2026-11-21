@@ -317,6 +317,12 @@ describe("holds", () => {
     expect(() => buildHoldQuery("VOICE", {})).toThrow(/needs coveredData/);
   });
 
+  it("uses the Voice covered-data values the API publishes", () => {
+    expect(buildHoldQuery("VOICE", { coveredData: ["VOICEMAILS"] })).toEqual({
+      voiceQuery: { coveredData: ["VOICEMAILS"] },
+    });
+  });
+
   it("refuses a query option that does not apply to the corpus", () => {
     expect(() => buildHoldQuery("DRIVE", { terms: "budget" })).toThrow(
       /does not apply to a DRIVE hold|do not apply to a DRIVE hold/,
@@ -398,15 +404,26 @@ describe("holds", () => {
     expect(gone.removed).toEqual([{ code: 0 }]);
   });
 
-  it("deletes a hold", async () => {
-    const scope = nock("https://vault.googleapis.com")
+  it("reads a hold before deleting it, because the delete returns Empty", async () => {
+    nock("https://vault.googleapis.com")
+      .get("/v1/matters/m1/holds/h1")
+      .query(true)
+      .reply(200, {
+        holdId: "h1",
+        name: "Hold on jdoe",
+        corpus: "MAIL",
+        accounts: [{ accountId: "a1" }],
+      });
+    const deletion = nock("https://vault.googleapis.com")
       .delete("/v1/matters/m1/holds/h1")
       .query(true)
-      .reply(200, { holdId: "h1", name: "Hold on jdoe", corpus: "MAIL" });
+      .reply(200, {});
 
-    await service().deleteHold("m1", "h1");
+    const released = await service().deleteHold("m1", "h1");
 
-    expect(scope.isDone()).toBe(true);
+    expect(deletion.isDone()).toBe(true);
+    expect(released.name).toBe("Hold on jdoe");
+    expect(released.accounts).toEqual([{ accountId: "a1" }]);
   });
 });
 
@@ -460,6 +477,13 @@ describe("saved queries", () => {
     expect((await service().getSavedQuery("m1", "sq1")).savedQueryId).toBe("sq1");
     await service().deleteSavedQuery("m1", "sq1");
     expect(deletion.isDone()).toBe(true);
+  });
+
+  it("sends a shared drive filter as the array the API declares", () => {
+    const query = buildQuery({ corpus: "DRIVE", sharedDriveId: "0ABC" });
+
+    expect(query.sharedDriveInfo).toEqual({ sharedDriveIds: ["0ABC"] });
+    expect(query.method).toBe("SHARED_DRIVE");
   });
 
   it("refuses a query with two search entities", () => {
