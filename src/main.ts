@@ -17,6 +17,7 @@ import { OrgUnitsService } from "./services/orgunits.js";
 import { ReportsService } from "./services/reports.js";
 import { ResourcesService } from "./services/resources.js";
 import { RolesService } from "./services/roles.js";
+import { TransferService } from "./services/transfer.js";
 import { UserSecurityService } from "./services/user-security.js";
 
 const VERSION = "0.1.0";
@@ -45,6 +46,7 @@ async function main(): Promise<void> {
   const { server } = buildServer({
     config,
     token,
+    transfer: auth ? new TransferService(auth) : undefined,
     resources: auth ? new ResourcesService(auth) : undefined,
     groupSettings: auth ? new GroupSettingsService(auth) : undefined,
     licensing: auth ? new LicensingService(auth) : undefined,

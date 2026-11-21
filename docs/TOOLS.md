@@ -12,6 +12,9 @@ is a bug.
 | `gws_users_create` | directory | yes | Never sets `isAdmin`; forces a password change. |
 | `gws_users_update` | directory | yes | PATCH only; omitted fields keep their values. |
 | `gws_users_suspend` | directory | yes | Destructive; needs `confirm: true`. |
+| `gws_transfers_list` | transfer | no | By status or either account. |
+| `gws_transfers_get` | transfer | no | Per-application status, not just the total. |
+| `gws_transfers_insert` | transfer | yes | Destructive; data moves between accounts. |
 | `gws_buildings_list` | resources | no | Buildings with address and floors. |
 | `gws_buildings_get` | resources | no | One building. |
 | `gws_buildings_create` | resources | yes | Rooms attach to an existing building. |

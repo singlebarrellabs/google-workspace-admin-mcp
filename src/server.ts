@@ -10,6 +10,7 @@ import type { GroupSettingsService } from "./services/group-settings.js";
 import type { LicensingService } from "./services/licensing.js";
 import type { ReportsService } from "./services/reports.js";
 import type { ResourcesService } from "./services/resources.js";
+import type { TransferService } from "./services/transfer.js";
 import type { DirectoryServices } from "./tools/directory.js";
 import { directoryTools } from "./tools/directory.js";
 import { groupSettingsTools } from "./tools/group-settings.js";
@@ -17,11 +18,13 @@ import { licensingTools } from "./tools/licensing.js";
 import { reportsTools } from "./tools/reports.js";
 import { resourceTools } from "./tools/resources.js";
 import { systemTools } from "./tools/system.js";
+import { transferTools } from "./tools/transfer.js";
 import { mapGoogleError, ToolError } from "./util/errors.js";
 
 export interface ServerDeps {
   config: AppConfig;
   token?: StoredToken;
+  transfer?: TransferService;
   resources?: ResourcesService;
   groupSettings?: GroupSettingsService;
   licensing?: LicensingService;
@@ -38,6 +41,7 @@ export function buildServer(deps: ServerDeps): { server: McpServer; tools: strin
   const specs: AnyToolSpec[] = [
     ...systemTools({ config, token, edition: deps.edition }),
     ...(deps.directory ? directoryTools(deps.directory) : []),
+    ...(deps.transfer ? transferTools(deps.transfer) : []),
     ...(deps.resources ? resourceTools(deps.resources) : []),
     ...(deps.groupSettings ? groupSettingsTools(deps.groupSettings) : []),
     ...(deps.licensing ? licensingTools(deps.licensing) : []),
