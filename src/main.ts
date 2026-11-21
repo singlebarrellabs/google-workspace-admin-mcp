@@ -21,8 +21,7 @@ import { RolesService } from "./services/roles.js";
 import { TransferService } from "./services/transfer.js";
 import { UserSecurityService } from "./services/user-security.js";
 import { VaultService } from "./services/vault.js";
-
-const VERSION = "0.1.0";
+import { VERSION } from "./version.js";
 
 async function main(): Promise<void> {
   const command = process.argv[2];
