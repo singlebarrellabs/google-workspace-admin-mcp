@@ -19,8 +19,9 @@ export interface UpdateResult {
 }
 
 /**
- * Groups Settings API. `groups.update` is a PUT with patch semantics: only the
- * fields present in the body change, so sending one field cannot blank another.
+ * Groups Settings API. `groups.patch` exists and is the documented partial
+ * update, so it is used instead of relying on PUT semantics to spare fields the
+ * caller did not mention.
  */
 export class GroupSettingsService {
   private readonly client: groupssettings_v1.Groupssettings;
@@ -61,13 +62,15 @@ export class GroupSettingsService {
     }
 
     const previous = await this.getSettings(groupEmail);
-    const body: Record<string, string> = {};
+    const body: Record<string, string | number> = {};
     for (const [name, value] of Object.entries(settings)) {
-      body[name] = String(value);
+      // Boolean and text settings are string-valued in the API; the byte limit
+      // is an integer and stays one.
+      body[name] = typeof value === "number" ? value : String(value);
     }
 
     try {
-      await this.client.groups.update({ groupUniqueId: groupEmail, requestBody: body as never });
+      await this.client.groups.patch({ groupUniqueId: groupEmail, requestBody: body as never });
       const current = await this.getSettings(groupEmail);
       return { group: groupEmail, requested: settings, previous: previous.groups, current };
     } catch (error) {

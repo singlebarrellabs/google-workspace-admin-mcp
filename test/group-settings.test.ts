@@ -72,8 +72,8 @@ describe("group settings update", () => {
       .query(true)
       .reply(200, { email: "team@example.com", whoCanJoin: "INVITED_CAN_JOIN" });
 
-    const put = nock("https://www.googleapis.com")
-      .put(groupPath("team%40example.com"), { whoCanJoin: "ANYONE_CAN_JOIN" })
+    const patch = nock("https://www.googleapis.com")
+      .patch(groupPath("team%40example.com"), { whoCanJoin: "ANYONE_CAN_JOIN" })
       .query(true)
       .reply(200, {});
 
@@ -87,7 +87,7 @@ describe("group settings update", () => {
       whoCanJoin: "ANYONE_CAN_JOIN",
     });
 
-    expect(put.isDone()).toBe(true);
+    expect(patch.isDone()).toBe(true);
     expect(result.requested).toEqual({ whoCanJoin: "ANYONE_CAN_JOIN" });
     expect(result.previous.membership).toEqual({ whoCanJoin: "INVITED_CAN_JOIN" });
     expect(result.current.groups.posting).toEqual({ whoCanPostMessage: "ALL_MEMBERS_CAN_POST" });
@@ -111,14 +111,35 @@ describe("group settings update", () => {
     });
   });
 
+  it("keeps the integer byte limit an integer", async () => {
+    nock("https://www.googleapis.com")
+      .get(groupPath("team%40example.com"))
+      .query(true)
+      .reply(200, { email: "team@example.com" });
+
+    const patch = nock("https://www.googleapis.com")
+      .patch(groupPath("team%40example.com"), { maxMessageBytes: 2048 })
+      .query(true)
+      .reply(200, {});
+
+    nock("https://www.googleapis.com")
+      .get(groupPath("team%40example.com"))
+      .query(true)
+      .reply(200, { email: "team@example.com", maxMessageBytes: "2048" });
+
+    await service().updateSettings("team@example.com", { maxMessageBytes: 2048 });
+
+    expect(patch.isDone()).toBe(true);
+  });
+
   it("stringifies booleans for the API body", async () => {
     nock("https://www.googleapis.com")
       .get(groupPath("team%40example.com"))
       .query(true)
       .reply(200, { email: "team@example.com" });
 
-    const put = nock("https://www.googleapis.com")
-      .put(groupPath("team%40example.com"), { allowExternalMembers: "true" })
+    const patch = nock("https://www.googleapis.com")
+      .patch(groupPath("team%40example.com"), { allowExternalMembers: "true" })
       .query(true)
       .reply(200, {});
 
@@ -129,7 +150,7 @@ describe("group settings update", () => {
 
     await service().updateSettings("team@example.com", { allowExternalMembers: true });
 
-    expect(put.isDone()).toBe(true);
+    expect(patch.isDone()).toBe(true);
   });
 });
 
