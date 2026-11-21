@@ -50,7 +50,6 @@ const ENTERPRISE_SURFACES = new Set(["vault", "cloud-search"]);
 const SURFACE_LABELS: Record<string, string> = {
   vault: "Google Vault",
   "cloud-search": "Cloud Search",
-  alerts: "Alert Center",
   directory: "the Directory API",
   reports: "the Reports API",
   transfer: "Data Transfer",

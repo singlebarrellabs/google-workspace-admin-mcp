@@ -3,7 +3,7 @@
 An MCP server for the **Google Workspace admin plane**: the APIs that manage a
 tenant, not the ones that read a user's mail.
 
-> **Status: 0.1.1.** Eight admin surfaces, 107 tools, published to npm.
+> **Status: released.** Eight admin surfaces, 107 tools, published to npm.
 > [`docs/TOOLS.md`](docs/TOOLS.md) lists every tool; [`docs/SETUP.md`](docs/SETUP.md)
 > takes you from a clean Cloud project to a working server.
 
