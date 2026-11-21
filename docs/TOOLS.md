@@ -1,8 +1,9 @@
 # Tools
 
-One row per tool.  A tool without a row is a bug: `npm test` builds every tool
-module and fails when a registered tool is not listed here. `npm run docs:tools`
-appends a placeholder row for anything new; the notes still need a human.
+One row per tool — 107 of them, across eight admin surfaces. A tool without a
+row is a bug: `npm test` builds every tool module and fails when a registered
+tool is not listed here. `npm run docs:tools` appends a placeholder row for
+anything new; the notes still need a human.
 
 | Tool | Surface | Mutating | Notes |
 | --- | --- | --- | --- |
