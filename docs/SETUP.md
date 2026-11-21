@@ -137,6 +137,7 @@ A super admin has all of them; anything less should be a custom role.
 | Surface | Role or privilege |
 | --- | --- |
 | Directory | User Management, Groups, or a custom admin role |
+| Devices | Chrome Management or Mobile Device Management privilege |
 | Reports | Reports privilege |
 | Vault | Vault privileges: View All Matters, Manage Holds, Manage Searches, Manage Exports |
 | Cloud Search | Cloud Search administrator |

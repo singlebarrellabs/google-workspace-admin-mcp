@@ -15,6 +15,15 @@ describe("error mapping", () => {
     expect(err.message).toContain("Enterprise");
   });
 
+  it("uses the product name in an edition message", () => {
+    const err = mapGoogleError(
+      googleError(403, "forbidden", "Customer does not have Vault installed."),
+      "vault",
+    );
+
+    expect(err.message).toContain("Google Vault");
+  });
+
   it("treats a 403 on Directory as a permission problem", () => {
     const err = mapGoogleError(googleError(403, "forbidden", "Not Authorized"), "directory");
     expect(err.category).toBe("permission_denied");
