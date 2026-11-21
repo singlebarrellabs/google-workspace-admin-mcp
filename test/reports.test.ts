@@ -44,6 +44,15 @@ afterEach(() => {
 });
 
 describe("reports activities", () => {
+  it("rejects an application outside the API's enum before the request", async () => {
+    const spec = reportsTools(service()).find(
+      (candidate) => candidate.name === "gws_activities_list",
+    );
+    if (!spec) throw new Error("gws_activities_list not built");
+
+    await expect(spec.run({ applicationName: "not_an_app" }, { dryRun: false })).rejects.toThrow();
+  });
+
   it("flattens one activity into one row per event", async () => {
     nock("https://admin.googleapis.com")
       .get(activityPath("all", "login"))
@@ -255,7 +264,7 @@ describe("reports usage", () => {
 
   it("keeps nested message parameters as objects", async () => {
     nock("https://admin.googleapis.com")
-      .get(entityUsagePath("gplus", "all", "2026-11-18"))
+      .get(entityUsagePath("gplus_communities", "all", "2026-11-18"))
       .query(true)
       .reply(200, {
         usageReports: [
@@ -273,7 +282,7 @@ describe("reports usage", () => {
       });
 
     const result = await service().entityUsage({
-      entityType: "gplus",
+      entityType: "gplus_communities",
       entityKey: "all",
       date: "2026-11-18",
     });

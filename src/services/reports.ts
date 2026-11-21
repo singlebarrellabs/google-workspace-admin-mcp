@@ -30,6 +30,57 @@ export interface ActivityRow {
   parameters: Record<string, string>;
 }
 
+/**
+ * The applications the Reports API accepts as a path value. It is a closed
+ * enum; an unknown name is a 400 from the API, so it is rejected here first.
+ */
+export const ACTIVITY_APPLICATIONS = [
+  "access_transparency",
+  "admin",
+  "calendar",
+  "chat",
+  "drive",
+  "gcp",
+  "gmail",
+  "gplus",
+  "groups",
+  "groups_enterprise",
+  "jamboard",
+  "login",
+  "meet",
+  "mobile",
+  "rules",
+  "saml",
+  "token",
+  "user_accounts",
+  "context_aware_access",
+  "chrome",
+  "data_studio",
+  "keep",
+  "vault",
+  "gemini_in_workspace_apps",
+  "classroom",
+  "assignments",
+  "cloud_search",
+  "tasks",
+  "data_migration",
+  "meet_hardware",
+  "directory_sync",
+  "ldap",
+  "profile",
+  "access_evaluation",
+  "admin_data_action",
+  "contacts",
+  "takeout",
+  "graduation",
+  "voice",
+  "chrome_sync",
+  "workspace_studio",
+  "gemini_notebook",
+] as const;
+
+export type ActivityApplication = (typeof ACTIVITY_APPLICATIONS)[number];
+
 export interface ListActivitiesArgs {
   applicationName: string;
   userKey?: string;
@@ -79,11 +130,11 @@ export interface UserUsageArgs extends UsageArgs {
   filters?: string;
   maxResults?: number;
   orgUnitID?: string;
-  groupId?: string;
+  groupIdFilter?: string;
 }
 
 export interface EntityUsageArgs extends UsageArgs {
-  entityType: string;
+  entityType: "gplus_communities";
   entityKey: string;
 }
 
@@ -153,7 +204,7 @@ export class ReportsService {
         ...(args.parameters?.length ? { parameters: args.parameters.join(",") } : {}),
         ...(args.filters ? { filters: args.filters } : {}),
         ...(args.orgUnitID ? { orgUnitID: args.orgUnitID } : {}),
-        ...(args.groupId ? { groupId: args.groupId } : {}),
+        ...(args.groupIdFilter ? { groupIdFilter: args.groupIdFilter } : {}),
         ...(args.pageToken ? { pageToken: args.pageToken } : {}),
       }),
     );

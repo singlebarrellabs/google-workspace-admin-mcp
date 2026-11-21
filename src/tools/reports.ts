@@ -1,11 +1,10 @@
 import { z } from "zod";
 import type { ToolSpec } from "../catalog.js";
-import type { ReportsService } from "../services/reports.js";
+import { ACTIVITY_APPLICATIONS, type ReportsService } from "../services/reports.js";
 
 const activitiesShape = {
   applicationName: z
-    .string()
-    .min(1)
+    .enum(ACTIVITY_APPLICATIONS)
     .describe('Application that owns the events, for example "login", "admin", "token", "drive"'),
   userKey: z.string().optional().describe('User email or profile id; default is "all"'),
   startTime: z.string().optional().describe("RFC 3339 start, for example 2026-11-01T00:00:00Z"),
@@ -46,13 +45,13 @@ const userUsageShape = {
     .optional()
     .describe('Parameter filters, for example "gmail:num_emails_sent>0"'),
   orgUnitID: z.string().optional().describe("Org unit id"),
-  groupId: z.string().optional().describe("Group id to restrict the report to"),
+  groupIdFilter: z.string().optional().describe('Group filter, for example "id:0123456789"'),
   maxResults: z.number().int().min(1).max(1000).optional().describe("Rows per page, default 100"),
 };
 
 const entityUsageShape = {
   ...usageCommon,
-  entityType: z.string().min(1).describe('Entity type, for example "gplus"'),
+  entityType: z.enum(["gplus_communities"]).describe('Only "gplus_communities" exists'),
   entityKey: z.string().min(1).describe('Entity key: "all", or the entity id'),
 };
 
