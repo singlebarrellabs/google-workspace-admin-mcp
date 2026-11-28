@@ -61,6 +61,37 @@ without guessing.
 | Calendar Resources | buildings, rooms, features |
 | Passthrough | one allowlisted raw call per enabled API, for what curated tools miss |
 
+## Compliance posture
+
+Google is tightening how AI agents reach Workspace data. The relevant facts,
+read against [Google's usage tiers][tiers] and the
+[Workspace AI Tools Addendum][addendum] on 2026-11-27:
+
+- **The APIs here are Workspace APIs.** The Admin SDK is in scope for the
+  Addendum, so the "AI agents must use a Google MCP" requirement covers this
+  server's use, not just Gmail and Drive.
+- **Google ships no MCP server for the admin plane.** Directory, Reports,
+  Vault, Cloud Search, Data Transfer and Licensing have no hosted equivalent.
+  There is therefore no compliant path to switch to today.
+- **Admin APIs are not in the first tiering wave.** Tiering started with Gmail,
+  Drive and Calendar. Usage quotas and billing for the admin surfaces are
+  unchanged for now, and enforcement of the MCP requirement has no mechanism
+  here yet.
+- **That is the current state, not a promise.** If Google extends tiering to
+  admin APIs or publishes an admin MCP server, this server's status changes and
+  this section will say so.
+
+If you need a defensible answer for a security review today: this server calls
+Admin SDK REST endpoints with a delegated admin OAuth token, holds no
+impersonation path, stores no user data, and has no hosted component. That is
+the accurate description of its risk surface; it is not a claim of compliance
+with the Addendum.
+
+Policy reviewed 2026-11-27.
+
+[tiers]: https://developers.google.com/workspace/guides/quota-usage-tiers
+[addendum]: https://workspace.google.com/terms/ai-tools/
+
 ## Authentication
 
 One credential: a **Desktop-app OAuth client** in your own Cloud project, with
